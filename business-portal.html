@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ottawa Arab Points - Business Portal</title>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- QR Code Generator -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+    <!-- Business Portal Container -->
+    <div id="businessPortal">
+        <!-- Business Login/Register -->
+        <div id="businessAuth" class="auth-overlay active">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <div class="auth-logo">
+                        <i class="fas fa-store-alt"></i>
+                        <h2>Ottawa Arab Points Business Portal</h2>
+                    </div>
+                    <p>For store owners and managers</p>
+                </div>
+                
+                <!-- Business Login -->
+                <div id="businessLoginForm" class="auth-form active">
+                    <h3>Business Login</h3>
+                    <p class="auth-subtitle">Sign in to your business account</p>
+                    
+                    <form id="businessLoginFormElement">
+                        <div class="form-group">
+                            <label for="businessLoginEmail">
+                                <i class="fas fa-envelope"></i> Business Email
+                            </label>
+                            <input type="email" id="businessLoginEmail" placeholder="owner@yourstore.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="businessLoginPassword">
+                                <i class="fas fa-lock"></i> Password
+                            </label>
+                            <input type="password" id="businessLoginPassword" placeholder="Enter your password" required>
+                            <button type="button" class="show-password" data-target="businessLoginPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary auth-btn">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        </button>
+                        
+                        <div class="auth-divider">
+                            <span>or</span>
+                        </div>
+                        
+                        <button type="button" class="btn btn-secondary auth-btn" id="showBusinessRegister">
+                            <i class="fas fa-store"></i> Register New Business
+                        </button>
+                        
+                        <div class="demo-notice" style="margin-top: 1.5rem;">
+                            <i class="fas fa-info-circle"></i>
+                            <p>New to the portal? <strong>Register your business</strong> to get started!</p>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Business Registration -->
+                <div id="businessRegisterForm" class="auth-form">
+                    <h3>Register Your Business</h3>
+                    <p class="auth-subtitle">Join Ottawa Arab Points as a business partner</p>
+                    
+                    <form id="businessRegisterFormElement">
+                        <div class="form-group">
+                            <label for="businessName">
+                                <i class="fas fa-store"></i> Business Name *
+                            </label>
+                            <input type="text" id="businessName" placeholder="Your Store Name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="businessType">
+                                <i class="fas fa-tag"></i> Business Type *
+                            </label>
+                            <select id="businessType" required>
+                                <option value="">Select type</option>
+                                <option value="grocery">Grocery Store</option>
+                                <option value="restaurant">Restaurant</option>
+                                <option value="bakery">Bakery</option>
+                                <option value="cafe">Cafe</option>
+                                <option value="market">Market</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ownerFirstName">
+                                    <i class="fas fa-user"></i> Owner First Name *
+                                </label>
+                                <input type="text" id="ownerFirstName" placeholder="First name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="ownerLastName">
+                                    <i class="fas fa-user"></i> Owner Last Name *
+                                </label>
+                                <input type="text" id="ownerLastName" placeholder="Last name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="businessEmail">
+                                <i class="fas fa-envelope"></i> Business Email *
+                            </label>
+                            <input type="email" id="businessEmail" placeholder="contact@yourstore.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="businessPhone">
+                                <i class="fas fa-phone"></i> Business Phone *
+                            </label>
+                            <input type="tel" id="businessPhone" placeholder="(613) 123-4567" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="businessAddress">
+                                <i class="fas fa-map-marker-alt"></i> Business Address
+                            </label>
+                            <input type="text" id="businessAddress" placeholder="123 Street, Ottawa, ON">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="businessPassword">
+                                <i class="fas fa-lock"></i> Create Password *
+                            </label>
+                            <input type="password" id="businessPassword" placeholder="Create a password" required>
+                            <div class="password-hint">
+                                Must be at least 8 characters
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="businessConfirmPassword">
+                                <i class="fas fa-lock"></i> Confirm Password *
+                            </label>
+                            <input type="password" id="businessConfirmPassword" placeholder="Confirm password" required>
+                        </div>
+                        
+                        <div class="form-group terms-group">
+                            <label class="terms-label">
+                                <input type="checkbox" id="agreeBusinessTerms" required>
+                                <span>I agree to the <a href="#">Business Terms</a> and <a href="#">Privacy Policy</a></span>
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary auth-btn">
+                            <i class="fas fa-store"></i> Register Business
+                        </button>
+                        
+                        <div class="auth-divider">
+                            <span>or</span>
+                        </div>
+                        
+                        <button type="button" class="btn btn-secondary auth-btn" id="showBusinessLogin">
+                            <i class="fas fa-sign-in-alt"></i> Back to Login
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Dashboard (Hidden until login) -->
+        <div id="businessDashboard" class="main-app" style="display: none;">
+            <!-- Business Navigation -->
+            <nav class="navbar">
+                <div class="nav-container">
+                    <div class="logo">
+                        <i class="fas fa-store-alt"></i>
+                        <span id="businessNavName">Business Portal</span>
+                    </div>
+                    <div class="nav-links">
+                        <a href="#businessHome" class="nav-link active"><i class="fas fa-home"></i> Dashboard</a>
+                        <a href="#businessStore" class="nav-link"><i class="fas fa-store"></i> My Store</a>
+                        <a href="#businessPromotions" class="nav-link"><i class="fas fa-tag"></i> Promotions</a>
+                        <a href="#businessQR" class="nav-link"><i class="fas fa-qrcode"></i> QR Codes</a>
+                        <a href="#businessAnalytics" class="nav-link"><i class="fas fa-chart-bar"></i> Analytics</a>
+                        <a href="#businessCustomers" class="nav-link"><i class="fas fa-users"></i> Customers</a>
+                    </div>
+                    <div class="user-menu">
+                        <button class="user-menu-btn" id="businessMenuBtn">
+                            <i class="fas fa-user-tie"></i>
+                            <span id="businessUserName">Owner</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown" id="businessDropdown">
+                            <div class="user-info">
+                                <i class="fas fa-user-tie"></i>
+                                <div>
+                                    <strong id="dropdownBusinessName">Store Owner</strong>
+                                    <small id="dropdownBusinessEmail">owner@store.com</small>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="#businessStore" class="dropdown-item">
+                                <i class="fas fa-store"></i> Store Settings
+                            </a>
+                            <a href="#businessAccount" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Account Settings
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <button id="businessLogoutBtn" class="dropdown-item logout">
+                                <i class="fas fa-sign-out-alt"></i> Sign Out
+                            </button>
+                        </div>
+                    </div>
+                    <button class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Business Main Content -->
+            <main id="businessApp">
+                <!-- Business Home/Dashboard -->
+                <section id="businessHome" class="section active">
+                    <div class="container">
+                        <div class="hero" style="background: linear-gradient(135deg, var(--primary-color), var(--dark-color));">
+                            <h1 id="businessWelcome">Welcome to Your Business Dashboard</h1>
+                            <p>Manage your store, promotions, and track customer engagement</p>
+                            
+                            <div class="hero-stats">
+                                <div class="stat">
+                                    <span class="stat-number" id="totalScans">0</span>
+                                    <span class="stat-label">Total Scans</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number" id="activeCustomers">0</span>
+                                    <span class="stat-label">Active Customers</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number" id="totalPoints">0</span>
+                                    <span class="stat-label">Points Given</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number" id="activePromotions">0</span>
+                                    <span class="stat-label">Active Promotions</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="quick-actions">
+                            <div class="action-card" onclick="showBusinessSection('businessPromotions')">
+                                <i class="fas fa-tag"></i>
+                                <h3>Create Promotion</h3>
+                                <p>Add new promotions for customers</p>
+                            </div>
+                            <div class="action-card" onclick="showBusinessSection('businessQR')">
+                                <i class="fas fa-qrcode"></i>
+                                <h3>Generate QR</h3>
+                                <p>Create QR codes for your store</p>
+                            </div>
+                            <div class="action-card" onclick="showBusinessSection('businessAnalytics')">
+                                <i class="fas fa-chart-line"></i>
+                                <h3>View Analytics</h3>
+                                <p>Check store performance</p>
+                            </div>
+                            <div class="action-card" onclick="downloadBusinessReport()">
+                                <i class="fas fa-download"></i>
+                                <h3>Download Report</h3>
+                                <p>Export customer data</p>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="profile-section">
+                            <div class="section-header">
+                                <h3>Recent Activity</h3>
+                                <button class="btn btn-small view-all-btn" onclick="showBusinessSection('businessAnalytics')">
+                                    View All <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                            <div class="activity-list" id="businessActivityList">
+                                <div class="activity-item">
+                                    <div>
+                                        <div class="activity-store">No activity yet</div>
+                                        <div class="activity-date">Start by adding promotions</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Tips -->
+                        <div class="profile-section">
+                            <h3>Getting Started Tips</h3>
+                            <div class="tips-grid">
+                                <div class="tip-card">
+                                    <i class="fas fa-qrcode"></i>
+                                    <h4>1. Generate QR Code</h4>
+                                    <p>Create and print your store QR code for customers to scan</p>
+                                </div>
+                                <div class="tip-card">
+                                    <i class="fas fa-tag"></i>
+                                    <h4>2. Add Promotions</h4>
+                                    <p>Create attractive promotions to encourage more visits</p>
+                                </div>
+                                <div class="tip-card">
+                                    <i class="fas fa-bullhorn"></i>
+                                    <h4>3. Promote Your Store</h4>
+                                    <p>Tell customers about your loyalty program</p>
+                                </div>
+                                <div class="tip-card">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <h4>4. Track Performance</h4>
+                                    <p>Monitor scans and adjust promotions as needed</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- My Store Section -->
+                <section id="businessStore" class="section">
+                    <div class="container">
+                        <h2 class="section-title">My Store Settings</h2>
+                        
+                        <div class="store-management-container">
+                            <!-- Store Information -->
+                            <div class="store-info-card">
+                                <div class="store-info-header">
+                                    <h3><i class="fas fa-store"></i> Store Information</h3>
+                                    <button class="btn btn-small" id="editStoreBtn">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                </div>
+                                
+                                <div class="store-info-body" id="storeInfoDisplay">
+                                    <!-- Store info will be loaded here -->
+                                </div>
+                                
+                                <!-- Store Edit Form (Initially Hidden) -->
+                                <div class="store-edit-form" id="storeEditForm" style="display: none;">
+                                    <h4>Edit Store Information</h4>
+                                    <form id="updateStoreForm">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="editStoreName">Store Name *</label>
+                                                <input type="text" id="editStoreName" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="editStoreType">Store Type *</label>
+                                                <select id="editStoreType" required>
+                                                    <option value="grocery">Grocery Store</option>
+                                                    <option value="restaurant">Restaurant</option>
+                                                    <option value="bakery">Bakery</option>
+                                                    <option value="cafe">Cafe</option>
+                                                    <option value="market">Market</option>
+                                                    <option value="other">Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="editStoreDescription">Store Description</label>
+                                            <textarea id="editStoreDescription" rows="3" placeholder="Describe your store..."></textarea>
+                                        </div>
+                                        
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="editStorePhone">Phone Number *</label>
+                                                <input type="tel" id="editStorePhone" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="editStoreEmail">Email *</label>
+                                                <input type="email" id="editStoreEmail" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="editStoreAddress">Address</label>
+                                            <input type="text" id="editStoreAddress" placeholder="Full address">
+                                        </div>
+                                        
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="editStorePoints">Points per Scan *</label>
+                                                <input type="number" id="editStorePoints" min="1" max="100" value="10" required>
+                                                <small>Points customers earn per visit</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="editStoreHours">Operating Hours</label>
+                                                <input type="text" id="editStoreHours" placeholder="e.g., 9 AM - 9 PM">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-actions">
+                                            <button type="button" class="btn btn-secondary" id="cancelStoreEdit">
+                                                Cancel
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save"></i> Save Changes
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <!-- Store Media -->
+                            <div class="store-media-card">
+                                <h3><i class="fas fa-images"></i> Store Media</h3>
+                                <div class="media-upload-area" id="storeLogoUpload">
+                                    <i class="fas fa-camera"></i>
+                                    <p>Click to upload store logo</p>
+                                    <input type="file" id="storeLogoInput" accept="image/*" hidden>
+                                </div>
+                                <div class="logo-preview" id="logoPreview">
+                                    <!-- Logo preview will appear here -->
+                                </div>
+                                <p class="media-hint">Recommended: 300x300px PNG or JPG</p>
+                            </div>
+                            
+                            <!-- Store Status -->
+                            <div class="store-status-card">
+                                <h3><i class="fas fa-toggle-on"></i> Store Status</h3>
+                                <div class="status-controls">
+                                    <div class="status-item">
+                                        <span class="status-label">Store Visibility</span>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="storeVisibility" checked>
+                                            <label for="storeVisibility"></label>
+                                            <span class="status-text">Visible to customers</span>
+                                        </div>
+                                    </div>
+                                    <div class="status-item">
+                                        <span class="status-label">Accepting Scans</span>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="storeAcceptingScans" checked>
+                                            <label for="storeAcceptingScans"></label>
+                                            <span class="status-text">Customers can scan QR</span>
+                                        </div>
+                                    </div>
+                                    <div class="status-item">
+                                        <span class="status-label">Email Notifications</span>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="storeEmailNotifications" checked>
+                                            <label for="storeEmailNotifications"></label>
+                                            <span class="status-text">Get scan notifications</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" id="saveStoreStatus">
+                                    <i class="fas fa-save"></i> Save Status
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Promotions Management -->
+                <section id="businessPromotions" class="section">
+                    <div class="container">
+                        <h2 class="section-title">Manage Promotions</h2>
+                        
+                        <!-- Create New Promotion -->
+                        <div class="promotion-creator">
+                            <h3><i class="fas fa-plus-circle"></i> Create New Promotion</h3>
+                            <form id="createPromotionForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="promotionTitle">Promotion Title *</label>
+                                        <input type="text" id="promotionTitle" placeholder="e.g., 20% Off Everything" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="promotionType">Promotion Type *</label>
+                                        <select id="promotionType" required>
+                                            <option value="discount">Discount</option>
+                                            <option value="free_item">Free Item</option>
+                                            <option value="bogo">Buy One Get One</option>
+                                            <option value="points_bonus">Points Bonus</option>
+                                            <option value="special_offer">Special Offer</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="promotionDescription">Description *</label>
+                                    <textarea id="promotionDescription" rows="3" placeholder="Describe the promotion details..." required></textarea>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="promotionPoints">Points Required *</label>
+                                        <input type="number" id="promotionPoints" min="10" max="1000" value="100" required>
+                                        <small>Points customers need to redeem</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="promotionQuantity">Quantity Available</label>
+                                        <input type="number" id="promotionQuantity" min="1" placeholder="Unlimited if empty">
+                                        <small>Leave empty for unlimited redemptions</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="promotionStartDate">Start Date *</label>
+                                        <input type="date" id="promotionStartDate" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="promotionEndDate">End Date</label>
+                                        <input type="date" id="promotionEndDate">
+                                        <small>Leave empty for no end date</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="promotionActive" checked>
+                                        <span>Activate promotion immediately</span>
+                                    </label>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Create Promotion
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Active Promotions -->
+                        <div class="promotions-list-section">
+                            <h3><i class="fas fa-tag"></i> Active Promotions</h3>
+                            <div class="promotions-grid" id="activePromotionsGrid">
+                                <!-- Active promotions will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Past Promotions -->
+                        <div class="promotions-list-section">
+                            <div class="section-header">
+                                <h3><i class="fas fa-history"></i> Past Promotions</h3>
+                                <button class="btn btn-small" onclick="togglePastPromotions()">
+                                    Show/Hide
+                                </button>
+                            </div>
+                            <div class="promotions-grid" id="pastPromotionsGrid" style="display: none;">
+                                <!-- Past promotions will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- QR Codes Management -->
+                <section id="businessQR" class="section">
+                    <div class="container">
+                        <h2 class="section-title">QR Code Management</h2>
+                        
+                        <!-- QR Generator -->
+                        <div class="qr-generator-section">
+                            <h3><i class="fas fa-qrcode"></i> Generate QR Codes</h3>
+                            <div class="qr-options">
+                                <div class="qr-option-card active" data-type="store">
+                                    <i class="fas fa-store"></i>
+                                    <h4>Store QR</h4>
+                                    <p>Main store QR code for points</p>
+                                </div>
+                                <div class="qr-option-card" data-type="promotion">
+                                    <i class="fas fa-tag"></i>
+                                    <h4>Promotion QR</h4>
+                                    <p>Direct link to specific promotion</p>
+                                </div>
+                                <div class="qr-option-card" data-type="custom">
+                                    <i class="fas fa-edit"></i>
+                                    <h4>Custom QR</h4>
+                                    <p>Custom message or URL</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Store QR Generator -->
+                            <div class="qr-generator-content" id="storeQRGenerator">
+                                <div class="qr-preview-container">
+                                    <div class="qr-preview" id="storeQRPreview">
+                                        <i class="fas fa-qrcode"></i>
+                                        <p>Your store QR code will appear here</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="qr-controls">
+                                    <button class="btn btn-primary" id="generateStoreQR">
+                                        <i class="fas fa-bolt"></i> Generate Store QR
+                                    </button>
+                                    <button class="btn btn-secondary" id="downloadStoreQR" disabled>
+                                        <i class="fas fa-download"></i> Download PNG
+                                    </button>
+                                    <button class="btn btn-small" id="printStoreQR" disabled>
+                                        <i class="fas fa-print"></i> Print
+                                    </button>
+                                </div>
+                                
+                                <div class="qr-instructions">
+                                    <h4><i class="fas fa-info-circle"></i> How to Use:</h4>
+                                    <ol>
+                                        <li>Generate your store QR code</li>
+                                        <li>Download and print the QR code</li>
+                                        <li>Display at checkout counters</li>
+                                        <li>Customers scan to earn points</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            
+                            <!-- Promotion QR Generator -->
+                            <div class="qr-generator-content" id="promotionQRGenerator" style="display: none;">
+                                <div class="form-group">
+                                    <label for="selectPromotionQR">Select Promotion:</label>
+                                    <select id="selectPromotionQR">
+                                        <option value="">Choose a promotion</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="qr-preview-container">
+                                    <div class="qr-preview" id="promotionQRPreview">
+                                        <i class="fas fa-qrcode"></i>
+                                        <p>Select a promotion to generate QR</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="qr-controls">
+                                    <button class="btn btn-primary" id="generatePromotionQR" disabled>
+                                        <i class="fas fa-bolt"></i> Generate QR
+                                    </button>
+                                    <button class="btn btn-secondary" id="downloadPromotionQR" disabled>
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Custom QR Generator -->
+                            <div class="qr-generator-content" id="customQRGenerator" style="display: none;">
+                                <div class="form-group">
+                                    <label for="customQRContent">Custom Content:</label>
+                                    <textarea id="customQRContent" rows="3" placeholder="Enter custom text, URL, or message..."></textarea>
+                                </div>
+                                
+                                <div class="qr-preview-container">
+                                    <div class="qr-preview" id="customQRPreview">
+                                        <i class="fas fa-qrcode"></i>
+                                        <p>Enter custom content to generate QR</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="qr-controls">
+                                    <button class="btn btn-primary" id="generateCustomQR">
+                                        <i class="fas fa-bolt"></i> Generate Custom QR
+                                    </button>
+                                    <button class="btn btn-secondary" id="downloadCustomQR" disabled>
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- QR Code History -->
+                        <div class="qr-history-section">
+                            <h3><i class="fas fa-history"></i> Generated QR Codes</h3>
+                            <div class="qr-history-grid" id="qrHistoryGrid">
+                                <!-- QR history will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Analytics Dashboard -->
+                <section id="businessAnalytics" class="section">
+                    <div class="container">
+                        <h2 class="section-title">Store Analytics</h2>
+                        
+                        <!-- Date Range Selector -->
+                        <div class="analytics-filters">
+                            <div class="date-range-selector">
+                                <label for="analyticsDateRange">Date Range:</label>
+                                <select id="analyticsDateRange">
+                                    <option value="7days">Last 7 Days</option>
+                                    <option value="30days">Last 30 Days</option>
+                                    <option value="90days">Last 90 Days</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                            <div class="custom-date-range" id="customDateRange" style="display: none;">
+                                <input type="date" id="startDate">
+                                <span>to</span>
+                                <input type="date" id="endDate">
+                                <button class="btn btn-small" id="applyCustomRange">Apply</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Key Metrics -->
+                        <div class="analytics-metrics">
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-qrcode"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <div class="metric-value" id="dailyScans">0</div>
+                                    <div class="metric-label">Daily Scans</div>
+                                    <div class="metric-change" id="scanChange">+0%</div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <div class="metric-value" id="newCustomers">0</div>
+                                    <div class="metric-label">New Customers</div>
+                                    <div class="metric-change" id="customerChange">+0%</div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <div class="metric-value" id="pointsGiven">0</div>
+                                    <div class="metric-label">Points Given</div>
+                                    <div class="metric-change" id="pointsChange">+0%</div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <div class="metric-value" id="promotionsRedeemed">0</div>
+                                    <div class="metric-label">Promotions Redeemed</div>
+                                    <div class="metric-change" id="promotionChange">+0%</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charts -->
+                        <div class="analytics-charts">
+                            <div class="chart-container">
+                                <h4>Daily Scans</h4>
+                                <canvas id="scansChart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h4>Top Promotions</h4>
+                                <canvas id="promotionsChart"></canvas>
+                            </div>
+                            <div class="chart-container full-width">
+                                <h4>Customer Activity Timeline</h4>
+                                <canvas id="timelineChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Export -->
+                        <div class="analytics-export">
+                            <h3><i class="fas fa-download"></i> Export Data</h3>
+                            <div class="export-options">
+                                <button class="btn btn-secondary" onclick="exportCSV('scans')">
+                                    <i class="fas fa-file-csv"></i> Export Scans
+                                </button>
+                                <button class="btn btn-secondary" onclick="exportCSV('customers')">
+                                    <i class="fas fa-file-csv"></i> Export Customers
+                                </button>
+                                <button class="btn btn-secondary" onclick="exportCSV('promotions')">
+                                    <i class="fas fa-file-csv"></i> Export Promotions
+                                </button>
+                                <button class="btn btn-primary" onclick="generateFullReport()">
+                                    <i class="fas fa-file-pdf"></i> Generate Full Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Customers Management -->
+                <section id="businessCustomers" class="section">
+                    <div class="container">
+                        <h2 class="section-title">Customer Management</h2>
+                        
+                        <!-- Customer Search -->
+                        <div class="customer-search">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="customerSearch" placeholder="Search customers by name, email, or phone...">
+                                <button class="btn btn-small" id="clearSearch">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                            </div>
+                            <div class="filter-options">
+                                <label for="customerFilter">Filter by:</label>
+                                <select id="customerFilter">
+                                    <option value="all">All Customers</option>
+                                    <option value="active">Active (Scanned in last 30 days)</option>
+                                    <option value="inactive">Inactive (No scans in 30 days)</option>
+                                    <option value="top">Top Customers (Most points)</option>
+                                    <option value="new">New This Month</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Customers List -->
+                        <div class="customers-list">
+                            <div class="customers-header">
+                                <h3>Customer List</h3>
+                                <div class="customers-count">
+                                    <span id="customersCount">0</span> customers found
+                                </div>
+                            </div>
+                            
+                            <div class="customers-table-container">
+                                <table class="customers-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Points</th>
+                                            <th>Last Visit</th>
+                                            <th>Total Visits</th>
+                                            <th>Promotions Used</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customersTableBody">
+                                        <!-- Customers will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Customer Insights -->
+                        <div class="customer-insights">
+                            <h3><i class="fas fa-chart-pie"></i> Customer Insights</h3>
+                            <div class="insights-grid">
+                                <div class="insight-card">
+                                    <div class="insight-icon">
+                                        <i class="fas fa-user-friends"></i>
+                                    </div>
+                                    <div class="insight-content">
+                                        <div class="insight-value" id="totalCustomers">0</div>
+                                        <div class="insight-label">Total Customers</div>
+                                    </div>
+                                </div>
+                                <div class="insight-card">
+                                    <div class="insight-icon">
+                                        <i class="fas fa-redo"></i>
+                                    </div>
+                                    <div class="insight-content">
+                                        <div class="insight-value" id="repeatRate">0%</div>
+                                        <div class="insight-label">Repeat Rate</div>
+                                    </div>
+                                </div>
+                                <div class="insight-card">
+                                    <div class="insight-icon">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="insight-content">
+                                        <div class="insight-value" id="avgVisits">0</div>
+                                        <div class="insight-label">Avg Visits/Customer</div>
+                                    </div>
+                                </div>
+                                <div class="insight-card">
+                                    <div class="insight-icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <div class="insight-content">
+                                        <div class="insight-value" id="busiestDay">-</div>
+                                        <div class="insight-label">Busiest Day</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- Footer -->
+            <footer style="background: var(--dark-color);">
+                <div class="container">
+                    <div class="footer-content">
+                        <div class="footer-sections">
+                            <div class="footer-section">
+                                <h5>Business Portal</h5>
+                                <a href="#businessHome"><i class="fas fa-home"></i> Dashboard</a>
+                                <a href="#businessStore"><i class="fas fa-store"></i> Store Settings</a>
+                                <a href="#businessPromotions"><i class="fas fa-tag"></i> Promotions</a>
+                                <a href="#businessQR"><i class="fas fa-qrcode"></i> QR Codes</a>
+                            </div>
+                            
+                            <div class="footer-section">
+                                <h5>Support</h5>
+                                <a href="#"><i class="fas fa-question-circle"></i> Help Center</a>
+                                <a href="#"><i class="fas fa-book"></i> Business Guide</a>
+                                <a href="#"><i class="fas fa-phone"></i> Contact Support</a>
+                                <a href="#"><i class="fas fa-video"></i> Video Tutorials</a>
+                            </div>
+                            
+                            <div class="footer-section">
+                                <h5>Resources</h5>
+                                <a href="#" onclick="downloadMarketingKit()"><i class="fas fa-download"></i> Marketing Kit</a>
+                                <a href="#" onclick="printQRGuides()"><i class="fas fa-print"></i> Printable Guides</a>
+                                <a href="#" onclick="openBusinessForum()"><i class="fas fa-users"></i> Business Forum</a>
+                                <a href="#" onclick="scheduleTraining()"><i class="fas fa-calendar"></i> Schedule Training</a>
+                            </div>
+                        </div>
+                        
+                        <div class="footer-bottom">
+                            <p>Ottawa Arab Points Business Portal &copy; 2024</p>
+                            <div class="portal-info">
+                                <span>Store ID: <strong id="footerStoreId">---</strong></span>
+                                <span>Joined: <strong id="footerJoinDate">---</strong></span>
+                            </div>
+                            <button id="businessPortalLogout" class="btn btn-small">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="business-portal.js"></script>
+</body>
+</html>

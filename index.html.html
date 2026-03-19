@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ottawa Arab Points — Loyalty Rewards</title>
+<meta name="theme-color" content="#0a0e1a">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy, onSnapshot, serverTimestamp, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ── Firebase Config ──
+  // TODO: Replace with your Firebase project config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBdujq0sn6pQGZktiAyaeTntGlfQ8MYVP4",
+    authDomain: "ottawa-deals.firebaseapp.com",
+    projectId: "ottawa-deals",
+    storageBucket: "ottawa-deals.firebasestorage.app",
+    messagingSenderId: "468903353105",
+    appId: "1:468903353105:web:864ea92efea5c5c6bc0ab0",
+    measurementId: "G-L06FJJ1D5E"
+  };
+
+  const ADMIN_EMAIL = "bouhoula_mohamedhedi@yahoo.fr";
+
+  let app, auth, db;
+  let firebaseReady = false;
+
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    firebaseReady = true;
+    window.__fbAuth = auth;
+    window.__fbDb = db;
+    window.__fbReady = true;
+    window.__adminEmail = ADMIN_EMAIL;
+    window.dispatchEvent(new Event('firebase-ready'));
+  } catch(e) {
+    console.warn('Firebase not configured — running in local demo mode:', e.message);
+    window.__fbReady = false;
+    window.dispatchEvent(new Event('firebase-ready'));
+  }
+
+  // Expose Firebase functions globally for use in non-module scripts
+  window.__fb = {
+    createUserWithEmailAndPassword: (em,pw) => createUserWithEmailAndPassword(auth, em, pw),
+    signInWithEmailAndPassword: (em,pw) => signInWithEmailAndPassword(auth, em, pw),
+    signOut: () => signOut(auth),
+    onAuthStateChanged: (cb) => onAuthStateChanged(auth, cb),
+    updatePassword,
+    sendPasswordResetEmail: (em) => sendPasswordResetEmail(auth, em),
+    // Firestore helpers
+    setDoc: (ref, data, opts) => setDoc(ref, data, opts),
+    getDoc: (ref) => getDoc(ref),
+    addDoc: (ref, data) => addDoc(ref, data),
+    updateDoc: (ref, data) => updateDoc(ref, data),
+    deleteDoc: (ref) => deleteDoc(ref),
+    getDocs: (q) => getDocs(q),
+    onSnapshot,
+    serverTimestamp: () => serverTimestamp(),
+    // Ref helpers
+    docRef: (path, ...segs) => doc(db, path, ...segs),
+    colRef: (path) => collection(db, path),
+    query,
+    orderBy,
+    where,
+    writeBatch: () => writeBatch(db),
+  };
+</script>
+
+<style>
+:root {
+  --bg:#0a0e1a;--bg2:#111827;--bg3:#1a2235;
+  --glass:rgba(255,255,255,.04);--glass2:rgba(255,255,255,.08);
+  --gold:#c9a84c;--gold-lt:#e8c97a;--gold-dk:#9a7535;
+  --gold-glow:rgba(201,168,76,.25);--gold-sub:rgba(201,168,76,.08);
+  --teal:#00b4a2;--teal-glow:rgba(0,180,162,.2);
+  --red:#e63946;--green:#2ec4b6;
+  --txt:#f0f2f8;--txt2:#9aa5be;--txt3:#5c6a84;
+  --bdr:rgba(255,255,255,.08);--bdr-gold:rgba(201,168,76,.3);--bdr-act:rgba(201,168,76,.6);
+  --grad-gold:linear-gradient(135deg,#c9a84c 0%,#e8c97a 50%,#9a7535 100%);
+  --grad-bg:linear-gradient(145deg,#111827 0%,#1a2235 100%);
+  --grad-hero:linear-gradient(160deg,#0d1525 0%,#0a0e1a 40%,#0f1a2e 100%);
+  --s-gold:0 8px 32px rgba(201,168,76,.22);--s-card:0 4px 24px rgba(0,0,0,.4);--s-deep:0 16px 48px rgba(0,0,0,.6);
+  --r:16px;--r-sm:10px;--r-lg:24px;--r-xl:32px;--r-pill:100px;
+  --nav-top:60px;--nav-bot:68px;--font:'Cairo','Tajawal',sans-serif;
+  --admin-accent:#7c3aed;--admin-sub:rgba(124,58,237,.15);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:15px;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden;min-height:100vh;
+  background-image:radial-gradient(circle at 20% 20%,rgba(201,168,76,.04) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(0,180,162,.03) 0%,transparent 50%)}
+body::before{content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='rgba(201,168,76,.025)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size:60px 60px;pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--gold-dk);border-radius:3px}
+.hidden{display:none!important}
+.container{max-width:520px;margin:0 auto;padding:0 1rem;position:relative;z-index:1}
+@keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--gold-glow)}70%{box-shadow:0 0 0 10px rgba(201,168,76,0)}}
+@keyframes scanLine{0%{top:0;opacity:1}100%{top:100%;opacity:.4}}
+@keyframes popIn{from{opacity:0;transform:translateX(-50%) scale(.7) translateY(20px)}to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
+@keyframes dropDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;font-family:var(--font);font-weight:700;font-size:.88rem;padding:.7rem 1.4rem;border-radius:var(--r-sm);border:none;cursor:pointer;transition:all .2s cubic-bezier(.34,1.56,.64,1);text-decoration:none;position:relative;overflow:hidden;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.1);opacity:0;transition:opacity .2s}
+.btn:hover::after{opacity:1}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--grad-gold);color:#0a0e1a;box-shadow:var(--s-gold)}
+.btn-primary:hover{box-shadow:0 12px 40px rgba(201,168,76,.4);transform:translateY(-1px)}
+.btn-secondary{background:var(--glass2);color:var(--txt);border:1.5px solid var(--bdr)}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{background:rgba(230,57,70,.12);color:var(--red);border:1.5px solid rgba(230,57,70,.3)}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-ghost{background:transparent;color:var(--txt2);border:1.5px solid var(--bdr)}
+.btn-ghost:hover{border-color:var(--bdr-gold);color:var(--gold)}
+.btn-admin{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;box-shadow:0 8px 24px rgba(124,58,237,.3)}
+.btn-admin:hover{box-shadow:0 12px 32px rgba(124,58,237,.45);transform:translateY(-1px)}
+.btn-sm{padding:.42rem .85rem;font-size:.76rem;border-radius:8px}
+.btn-full{width:100%}
+.btn-teal{background:rgba(0,180,162,.15);color:var(--teal);border:1.5px solid rgba(0,180,162,.3)}
+.btn-teal:hover{background:var(--teal);color:#fff}
+
+/* ── FORM ── */
+.fg{margin-bottom:.85rem;position:relative}
+.fg label{display:flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:700;color:var(--txt2);margin-bottom:.32rem;letter-spacing:.05em;text-transform:uppercase}
+.fg label i{color:var(--gold);font-size:.65rem}
+.fg input,.fg select,.fg textarea{width:100%;padding:.72rem 1rem;background:var(--glass2);border:1.5px solid var(--bdr);border-radius:var(--r-sm);color:var(--txt);font-family:var(--font);font-size:.88rem;outline:none;transition:all .22s;-webkit-appearance:none;appearance:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);background:rgba(201,168,76,.06);box-shadow:0 0 0 3px var(--gold-glow)}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--txt3)}
+.fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c9a84c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;padding-right:2rem}
+.fg select option{background:#1a2235;color:var(--txt)}
+.fg textarea{resize:vertical;min-height:80px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.show-pwd{position:absolute;right:.75rem;bottom:.75rem;background:none;border:none;color:var(--txt3);cursor:pointer;font-size:.82rem;transition:color .2s}
+.show-pwd:hover{color:var(--gold)}
+.pwd-hint{font-size:.68rem;color:var(--txt3);margin-top:.2rem}
+.check-lbl{display:flex;align-items:flex-start;gap:.5rem;font-size:.78rem;color:var(--txt2);cursor:pointer}
+.check-lbl a{color:var(--gold);text-decoration:none}
+.check-lbl input[type=checkbox]{accent-color:var(--gold);width:15px;height:15px;flex-shrink:0;margin-top:.1rem}
+
+/* ══ AUTH ══ */
+#authOverlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:flex-end;justify-content:center;overflow-y:auto;
+  background-image:radial-gradient(ellipse at top,rgba(201,168,76,.08) 0%,transparent 60%),radial-gradient(ellipse at bottom,rgba(0,180,162,.05) 0%,transparent 60%)}
+.auth-wrap{background:var(--bg2);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:1rem 1.4rem 2.5rem;width:100%;max-width:480px;border-top:1px solid var(--bdr-gold);box-shadow:var(--s-deep);position:relative;overflow:hidden;animation:slideUp .45s cubic-bezier(.34,1.56,.64,1)}
+.auth-wrap::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:36px;height:4px;background:var(--bdr);border-radius:var(--r-pill)}
+.auth-logo{display:flex;align-items:center;justify-content:center;gap:.55rem;margin:.5rem 0 .3rem}
+.auth-logo i{font-size:1.7rem;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.auth-logo h2{font-size:1.25rem;font-weight:900;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.02em}
+.auth-sub{text-align:center;font-size:.78rem;color:var(--txt3);margin-bottom:1.4rem}
+.auth-form{display:none;animation:fadeIn .3s ease}
+.auth-form.active{display:block}
+.auth-form h3{font-size:1.15rem;font-weight:800;color:var(--txt);margin-bottom:.15rem;letter-spacing:-.02em}
+.auth-form p{font-size:.78rem;color:var(--txt3);margin-bottom:1rem}
+.auth-divider{display:flex;align-items:center;gap:.65rem;margin:.7rem 0;color:var(--txt3);font-size:.75rem}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.auth-link{text-align:center;font-size:.78rem;color:var(--gold);cursor:pointer;font-weight:600;margin-top:.5rem;display:block;transition:color .2s}
+.form-opts{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;font-size:.76rem}
+.rem-lbl{display:flex;align-items:center;gap:.35rem;color:var(--txt2);cursor:pointer}
+.demo-box{margin-top:1.1rem;background:var(--gold-sub);border:1px solid var(--bdr-gold);border-radius:var(--r-sm);padding:.65rem .9rem;display:flex;gap:.5rem;font-size:.73rem;color:var(--txt2)}
+.demo-box i{color:var(--gold);flex-shrink:0;margin-top:.1rem}
+.demo-box strong{color:var(--gold-lt)}
+.firebase-badge{display:flex;align-items:center;gap:.4rem;background:rgba(255,160,0,.07);border:1px solid rgba(255,160,0,.25);border-radius:var(--r-sm);padding:.45rem .75rem;font-size:.7rem;color:#ffa000;margin-bottom:.8rem}
+.firebase-badge i{font-size:.75rem}
+
+/* ══ TOP NAV ══ */
+#topNav{position:fixed;top:0;left:0;right:0;height:var(--nav-top);background:rgba(10,14,26,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);z-index:900;display:none;transition:box-shadow .3s}
+#topNav.scrolled{box-shadow:0 4px 30px rgba(0,0,0,.45);border-bottom-color:rgba(201,168,76,.18)}
+.nav-bar{display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 1rem;max-width:520px;margin:0 auto}
+.nav-logo{display:flex;align-items:center;gap:.45rem;text-decoration:none;cursor:pointer;border:none;background:none;font-family:var(--font)}
+.nav-logo i{font-size:1.2rem;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-logo span{font-size:.95rem;font-weight:900;color:var(--txt);letter-spacing:-.02em}
+.nav-logo span em{font-style:normal;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-right{display:flex;align-items:center;gap:.5rem}
+.admin-nav-badge{display:flex;align-items:center;gap:.28rem;background:linear-gradient(135deg,#7c3aed,#a855f7);padding:.28rem .65rem;border-radius:var(--r-pill);font-size:.67rem;font-weight:800;color:#fff;letter-spacing:.03em}
+.admin-nav-badge i{font-size:.6rem}
+.user-btn{display:flex;align-items:center;gap:.45rem;background:var(--glass2);border:1.5px solid var(--bdr);border-radius:var(--r-pill);padding:.35rem .8rem .35rem .45rem;cursor:pointer;color:var(--txt);font-family:var(--font);font-size:.8rem;font-weight:700;transition:all .2s;position:relative}
+.user-btn:hover{border-color:var(--gold)}
+.user-btn .uav{width:28px;height:28px;background:var(--grad-gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#0a0e1a;font-weight:900;font-size:.8rem;flex-shrink:0}
+.user-btn.is-admin .uav{background:linear-gradient(135deg,#7c3aed,#a855f7)}
+.pts-pill{background:var(--gold-sub);border:1px solid var(--bdr-gold);border-radius:var(--r-pill);padding:.1rem .5rem;font-size:.68rem;color:var(--gold);font-weight:800;display:flex;align-items:center;gap:.25rem}
+.user-drop{position:absolute;top:calc(100% + 8px);right:0;background:var(--bg2);border:1px solid var(--bdr-gold);border-radius:var(--r);min-width:220px;box-shadow:var(--s-deep);display:none;overflow:hidden;z-index:1000;animation:dropDown .2s ease}
+.user-drop.open{display:block}
+.drop-head{display:flex;align-items:center;gap:.6rem;padding:.85rem 1rem;background:var(--gold-sub);border-bottom:1px solid var(--bdr)}
+.drop-head .dav{width:36px;height:36px;background:var(--grad-gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#0a0e1a;font-weight:900;font-size:1rem;flex-shrink:0}
+.drop-head .dav.admin-av{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
+.drop-head strong{font-size:.83rem;color:var(--txt);display:block}
+.drop-head small{font-size:.7rem;color:var(--txt3)}
+.drop-item{display:flex;align-items:center;gap:.55rem;padding:.65rem 1rem;font-size:.8rem;color:var(--txt2);cursor:pointer;border:none;background:none;width:100%;font-family:var(--font);transition:all .15s;text-align:left}
+.drop-item i{color:var(--gold);width:14px;text-align:center;font-size:.78rem}
+.drop-item:hover{background:var(--glass2);color:var(--txt)}
+.drop-item.danger{color:var(--red)}.drop-item.danger i{color:var(--red)}
+.drop-item.admin-item i{color:#a855f7}
+.drop-div{height:1px;background:var(--bdr);margin:.2rem 0}
+
+/* ══ BOTTOM NAV ══ */
+#botNav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-bot);background:rgba(17,24,39,.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--bdr);display:none;align-items:stretch;z-index:900;padding:0 .25rem;padding-bottom:env(safe-area-inset-bottom)}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem;text-decoration:none;color:var(--txt3);font-size:.6rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border:none;background:none;font-family:var(--font);transition:all .2s;position:relative;-webkit-tap-highlight-color:transparent;padding:0}
+.bn-item i{font-size:1.15rem;transition:all .2s}
+.bn-item::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--grad-gold);border-radius:0 0 4px 4px;transition:width .25s ease}
+.bn-item.active{color:var(--gold)}.bn-item.active::before{width:30px}.bn-item.active i{transform:translateY(-2px)}
+.bn-scan{color:#0a0e1a!important}
+.bn-scan .scan-wrap{width:46px;height:46px;background:var(--grad-gold);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:var(--s-gold);margin-top:-20px;transition:all .2s cubic-bezier(.34,1.56,.64,1)}
+.bn-scan .scan-wrap i{color:#0a0e1a;font-size:1.05rem}
+.bn-scan:hover .scan-wrap{transform:scale(1.1)}.bn-scan::before{display:none}
+.bn-item.admin-nav-item.active{color:#a855f7}
+.bn-item.admin-nav-item::before{background:linear-gradient(135deg,#7c3aed,#a855f7)}
+.bn-item.admin-nav-item i{color:#a855f7}
+
+/* ══ MAIN ══ */
+#mainApp{display:none;padding-top:var(--nav-top);padding-bottom:calc(var(--nav-bot) + env(safe-area-inset-bottom))}
+.page{display:none;animation:fadeIn .28s ease}.page.active{display:block}
+.sec-title{font-size:1.3rem;font-weight:900;color:var(--txt);padding:1.1rem 0 .7rem;letter-spacing:-.02em;display:flex;align-items:center;gap:.5rem}
+.sec-title i{background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sec-title i.admin-icon{background:linear-gradient(135deg,#7c3aed,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+.sec-hdr h3{font-size:.95rem;font-weight:800;color:var(--txt)}
+.gold-line{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.3;margin:.85rem 0}
+
+/* ══ HOME ══ */
+.hero-card{background:var(--grad-hero);border:1px solid var(--bdr-gold);border-radius:var(--r-lg);padding:1.5rem 1.2rem;margin:1rem 0;position:relative;overflow:hidden}
+.hero-card::before{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;background:radial-gradient(circle,rgba(201,168,76,.12) 0%,transparent 70%);border-radius:50%}
+.hero-card::after{content:'';position:absolute;bottom:-35px;left:-25px;width:110px;height:110px;background:radial-gradient(circle,rgba(0,180,162,.09) 0%,transparent 70%);border-radius:50%}
+.hero-card h1{font-size:1.2rem;font-weight:900;color:var(--txt);margin-bottom:.4rem;line-height:1.3;letter-spacing:-.02em;position:relative;z-index:1}
+.hero-card p{font-size:.78rem;color:var(--txt2);margin-bottom:1.1rem;line-height:1.6;position:relative;z-index:1}
+.hero-stats{display:flex;gap:.6rem;position:relative;z-index:1}
+.h-stat{flex:1;background:var(--glass);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:.6rem .4rem;text-align:center}
+.h-stat-n{display:block;font-size:1rem;font-weight:900;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:.15rem}
+.h-stat-l{font-size:.6rem;color:var(--txt3);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin:1rem 0}
+.q-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:1.15rem 1rem;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.q-card::before{content:'';position:absolute;inset:0;background:var(--gold-sub);opacity:0;transition:opacity .2s}
+.q-card:hover::before,.q-card:active::before{opacity:1}
+.q-card:hover{border-color:var(--bdr-gold);transform:translateY(-2px);box-shadow:var(--s-gold)}
+.q-card:active{transform:scale(.96)}
+.q-card i{font-size:1.4rem;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;margin-bottom:.55rem;position:relative;z-index:1}
+.q-card h3{font-size:.85rem;font-weight:800;color:var(--txt);margin-bottom:.18rem;position:relative;z-index:1}
+.q-card p{font-size:.7rem;color:var(--txt3);line-height:1.4;position:relative;z-index:1}
+
+/* Activity */
+.act-list{display:flex;flex-direction:column;gap:.45rem}
+.act-item{display:flex;align-items:center;gap:.7rem;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:.7rem;transition:all .2s;animation:fadeIn .3s ease}
+.act-item:hover{border-color:var(--bdr-gold)}
+.act-ico{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.88rem}
+.act-ico.earn{background:rgba(201,168,76,.15);color:var(--gold)}
+.act-ico.redeem{background:rgba(0,180,162,.15);color:var(--teal)}
+.act-content{flex:1;min-width:0}
+.act-store{font-size:.82rem;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act-date{font-size:.68rem;color:var(--txt3);margin-top:.08rem}
+.act-pts{font-weight:900;font-size:.85rem;flex-shrink:0}
+.act-pts.earn{color:var(--gold)}.act-pts.redeem{color:var(--teal)}
+.skel{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;border-radius:var(--r-sm)}
+.empty-msg{text-align:center;padding:2.5rem 1rem;color:var(--txt3)}
+.empty-msg i{font-size:2rem;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;margin-bottom:.6rem;opacity:.35}
+.empty-msg p{font-size:.8rem}
+
+/* ══ PROFILE ══ */
+.prof-hero{background:var(--grad-hero);border:1px solid var(--bdr-gold);border-radius:var(--r-lg);padding:1.5rem 1rem;margin:1rem 0;text-align:center;position:relative;overflow:hidden}
+.prof-av-wrap{position:relative;display:inline-block;margin-bottom:.7rem}
+.prof-av-wrap i{font-size:4rem;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.prof-edit-av{position:absolute;bottom:0;right:0;width:24px;height:24px;background:var(--gold);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#0a0e1a;font-size:.6rem;transition:transform .2s}
+.prof-name{font-size:1.2rem;font-weight:900;color:var(--txt);margin-bottom:.4rem;letter-spacing:-.02em}
+.pts-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--grad-gold);padding:.35rem 1.1rem;border-radius:var(--r-pill);font-size:1rem;font-weight:900;color:#0a0e1a;margin-bottom:.5rem}
+.prof-meta{font-size:.73rem;color:var(--txt3);display:flex;align-items:center;justify-content:center;gap:.4rem;flex-wrap:wrap}
+.prof-meta span{display:flex;align-items:center;gap:.25rem}
+.prof-meta i{color:var(--gold);font-size:.65rem}
+.prof-acts{display:flex;gap:.5rem;margin:0 0 .75rem;flex-wrap:wrap}
+.prof-acts .btn{flex:1;min-width:0;font-size:.76rem;padding:.58rem .4rem}
+.prof-section{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:.9rem;margin-bottom:.7rem}
+.prof-section h3{font-size:.9rem;font-weight:800;color:var(--txt);margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem}
+.prof-section h3 i{color:var(--gold);font-size:.82rem}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.stat-box{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:.85rem;display:flex;align-items:center;gap:.65rem;transition:border-color .2s}
+.stat-box:hover{border-color:var(--bdr-gold)}
+.stat-box .sico{width:36px;height:36px;background:var(--gold-sub);border:1px solid var(--bdr-gold);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-box .sico i{color:var(--gold);font-size:.88rem}
+.stat-box .sval{font-size:1.05rem;font-weight:900;color:var(--txt);line-height:1;display:block;margin-bottom:.1rem}
+.stat-box .slbl{font-size:.63rem;color:var(--txt3);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.prog-bar-bg{height:9px;background:var(--bg3);border-radius:var(--r-pill);overflow:hidden;margin:.35rem 0;border:1px solid var(--bdr)}
+.prog-bar-fill{height:100%;background:var(--grad-gold);border-radius:var(--r-pill);transition:width .8s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 8px rgba(201,168,76,.35)}
+.prog-labels{display:flex;justify-content:space-between;font-size:.67rem;color:var(--txt3)}
+.prog-labels span:nth-child(2){color:var(--gold);font-weight:800}
+.lvl-desc{font-size:.75rem;color:var(--txt2);text-align:center;padding:.45rem .75rem;background:var(--gold-sub);border:1px solid var(--bdr-gold);border-radius:var(--r-sm);margin-top:.5rem}
+
+/* ══ STORES ══ */
+.filter-scroll{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.4rem;margin-bottom:.65rem;scrollbar-width:none}
+.filter-scroll::-webkit-scrollbar{display:none}
+.f-chip{flex-shrink:0;padding:.38rem .85rem;border:1.5px solid var(--bdr);border-radius:var(--r-pill);background:var(--bg2);font-size:.75rem;font-weight:700;color:var(--txt3);cursor:pointer;transition:all .2s;font-family:var(--font);white-space:nowrap}
+.f-chip:hover{border-color:var(--bdr-gold);color:var(--gold)}.f-chip.active{background:var(--grad-gold);border-color:transparent;color:#0a0e1a}
+.filter-bar{display:flex;gap:.5rem;margin-bottom:.65rem;flex-wrap:wrap}
+.filter-bar select{background:var(--bg3);border:1.5px solid var(--bdr);border-radius:8px;color:var(--txt);font-family:var(--font);font-size:.78rem;padding:.4rem .65rem;cursor:pointer;outline:none;transition:border-color .2s;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23c9a84c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .6rem center;padding-right:1.8rem}
+.filter-bar select:focus{border-color:var(--gold)}.filter-bar select option{background:#1a2235}
+.res-cnt{font-size:.72rem;color:var(--txt3);margin-bottom:.65rem}.res-cnt strong{color:var(--gold)}
+.stores-list{display:flex;flex-direction:column;gap:.7rem;padding-bottom:1rem}
+.store-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;transition:all .25s cubic-bezier(.34,1.56,.64,1);animation:fadeIn .3s ease}
+.store-card:hover{border-color:var(--bdr-gold);box-shadow:var(--s-gold);transform:translateY(-2px)}
+.store-banner{height:72px;background:var(--grad-hero);display:flex;align-items:center;justify-content:center;font-size:2.2rem;position:relative;overflow:hidden}
+.store-body{padding:.9rem}
+.store-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.42rem}
+.store-name{font-size:.92rem;font-weight:800;color:var(--txt);line-height:1.3}
+.store-badge{padding:.18rem .52rem;border-radius:var(--r-pill);font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0}
+.s-active{background:rgba(46,196,182,.15);color:var(--green);border:1px solid rgba(46,196,182,.3)}
+.s-inactive{background:rgba(92,106,132,.18);color:var(--txt3);border:1px solid var(--bdr)}
+.store-meta{display:flex;gap:.65rem;font-size:.7rem;color:var(--txt3);margin-bottom:.55rem;flex-wrap:wrap}
+.store-meta span{display:flex;align-items:center;gap:.28rem}
+.store-meta i{color:var(--gold);font-size:.62rem}
+.store-desc{font-size:.75rem;color:var(--txt2);line-height:1.5;margin-bottom:.6rem}
+.pts-pill{display:inline-flex;align-items:center;gap:.32rem;background:var(--gold-sub);border:1px solid var(--bdr-gold);border-radius:var(--r-pill);padding:.27rem .7rem;font-size:.72rem;font-weight:800;color:var(--gold)}
+.store-actions{display:flex;gap:.4rem;justify-content:flex-end;margin-top:.65rem}
+
+/* ══ REWARDS ══ */
+.rewards-list{display:flex;flex-direction:column;gap:.65rem;padding-bottom:1rem}
+.reward-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:.9rem;display:flex;gap:.8rem;align-items:center;transition:all .25s ease;animation:fadeIn .3s ease}
+.reward-card:hover{border-color:var(--bdr-gold);box-shadow:var(--s-gold)}
+.reward-card.locked{opacity:.55}
+.r-ico{width:52px;height:52px;border-radius:var(--r-sm);background:var(--gold-sub);border:1px solid var(--bdr-gold);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.r-body{flex:1;min-width:0}
+.r-name{font-size:.88rem;font-weight:800;color:var(--txt);margin-bottom:.18rem}
+.r-desc{font-size:.73rem;color:var(--txt2);line-height:1.4;margin-bottom:.45rem}
+.r-foot{display:flex;align-items:center;justify-content:space-between}
+.r-pts{display:flex;align-items:center;gap:.28rem;font-size:.82rem;font-weight:900;color:var(--gold)}
+.r-type{font-size:.63rem;font-weight:700;padding:.18rem .52rem;border-radius:var(--r-pill);text-transform:uppercase;letter-spacing:.05em;background:rgba(201,168,76,.1);color:var(--gold-txt);border:1px solid var(--bdr-gold)}
+
+/* ══ ADMIN PAGE (enhanced) ══ */
+.admin-hero{background:linear-gradient(160deg,#1a0f3a 0%,#120e2a 40%,#0f1a2e 100%);border:1px solid rgba(124,58,237,.35);border-radius:var(--r);padding:.95rem 1rem;margin-bottom:.75rem;display:flex;align-items:center;gap:.7rem;position:relative;overflow:hidden}
+.admin-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,rgba(124,58,237,.2) 0%,transparent 70%);border-radius:50%}
+.admin-hero i{font-size:1.5rem;background:linear-gradient(135deg,#7c3aed,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0;position:relative;z-index:1}
+.admin-hero h3{font-size:.92rem;font-weight:800;color:var(--txt);margin-bottom:.12rem;position:relative;z-index:1}
+.admin-hero p{font-size:.72rem;color:#9f7aea;position:relative;z-index:1}
+.admin-stats{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.75rem}
+.admin-section{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:.9rem;margin-bottom:.7rem}
+.admin-section h3{font-size:.88rem;font-weight:800;color:var(--txt);margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem}
+.admin-section h3 i{color:var(--gold);font-size:.8rem}
+.admin-section h3 i.purple{color:#a855f7}
+.form-box{background:var(--bg3);border:1px solid var(--bdr-gold);border-radius:var(--r-sm);padding:.9rem;margin-bottom:.75rem;display:none}
+.form-box.open{display:block;animation:fadeIn .25s ease}
+.form-box h4{font-size:.85rem;font-weight:800;color:var(--gold);margin-bottom:.85rem;display:flex;align-items:center;gap:.4rem}
+.form-box.admin-form{border-color:rgba(124,58,237,.35);background:rgba(124,58,237,.05)}
+.form-box.admin-form h4{color:#a855f7}
+.form-actions{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.6rem}
+.mgmt-list{display:flex;flex-direction:column;gap:.45rem}
+.mgmt-item{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:.8rem;display:flex;align-items:center;gap:.65rem;transition:border-color .2s}
+.mgmt-item:hover{border-color:var(--bdr-gold)}
+.mgmt-item.admin-item:hover{border-color:rgba(124,58,237,.4)}
+.mgmt-info{flex:1;min-width:0}
+.mgmt-name{font-size:.82rem;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mgmt-sub{font-size:.7rem;color:var(--txt3)}
+.mgmt-acts{display:flex;gap:.35rem;flex-shrink:0}
+
+/* User management */
+.user-avatar-sm{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;flex-shrink:0;background:var(--grad-gold);color:#0a0e1a}
+.user-avatar-sm.admin-user{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
+.user-pts-badge{display:inline-flex;align-items:center;gap:.2rem;background:var(--gold-sub);border:1px solid var(--bdr-gold);border-radius:var(--r-pill);padding:.12rem .5rem;font-size:.65rem;font-weight:800;color:var(--gold)}
+.role-badge{display:inline-flex;align-items:center;gap:.2rem;padding:.12rem .45rem;border-radius:var(--r-pill);font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.role-admin{background:rgba(124,58,237,.15);color:#a855f7;border:1px solid rgba(124,58,237,.3)}
+.role-user{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid var(--bdr-gold)}
+
+/* Purchase/achat */
+.achat-form-box{background:rgba(0,180,162,.05);border:1px solid rgba(0,180,162,.25);border-radius:var(--r-sm);padding:.9rem;margin-bottom:.75rem;display:none}
+.achat-form-box.open{display:block;animation:fadeIn .25s ease}
+.achat-form-box h4{font-size:.85rem;font-weight:800;color:var(--teal);margin-bottom:.85rem;display:flex;align-items:center;gap:.4rem}
+
+/* QR */
+.qr-zone{background:var(--bg3);border:2px dashed var(--bdr-gold);border-radius:var(--r);min-height:160px;display:flex;align-items:center;justify-content:center;margin:1rem 0;position:relative}
+.qr-placeholder{text-align:center;color:var(--txt3)}
+.qr-placeholder i{font-size:2.5rem;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;margin-bottom:.45rem;opacity:.45}
+.qr-controls{display:flex;gap:.45rem;flex-wrap:wrap}
+.qr-info{background:var(--bg3);border-radius:var(--r-sm);padding:.8rem;margin-top:.85rem}
+.qr-info h4{font-size:.73rem;font-weight:800;color:var(--txt2);margin-bottom:.55rem;text-transform:uppercase;letter-spacing:.06em}
+.info-row{display:flex;justify-content:space-between;font-size:.76rem;margin-bottom:.3rem}
+.info-row .lbl{color:var(--txt3)}.info-row .val{color:var(--gold);font-weight:700}
+.settings-grid{display:flex;flex-direction:column;gap:.55rem}
+.setting-card{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:.8rem;display:flex;gap:.65rem;align-items:flex-start;transition:border-color .2s}
+.setting-card:hover{border-color:var(--bdr-gold)}
+.setting-ico{width:34px;height:34px;background:var(--gold-sub);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.setting-ico i{color:var(--gold);font-size:.85rem}
+.setting-body h4{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:.15rem}
+.setting-body p{font-size:.7rem;color:var(--txt3);margin-bottom:.5rem}
+.pts-set{display:flex;gap:.4rem;align-items:center}
+.pts-set input{width:75px;background:var(--bg2);border:1.5px solid var(--bdr);border-radius:7px;color:var(--txt);padding:.38rem .6rem;font-family:var(--font);font-size:.82rem;outline:none}
+.pts-set input:focus{border-color:var(--gold)}
+.tog{display:flex;align-items:center;gap:.55rem}
+.tog input[type=checkbox]{position:relative;width:38px;height:20px;-webkit-appearance:none;appearance:none;background:var(--bg2);border-radius:10px;cursor:pointer;transition:background .2s;border:1px solid var(--bdr)}
+.tog input[type=checkbox]:checked{background:var(--gold);border-color:var(--gold)}
+.tog input[type=checkbox]::before{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s}
+.tog input[type=checkbox]:checked::before{transform:translateX(18px)}
+.tog span{font-size:.76rem;color:var(--txt2)}
+.data-acts{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:1rem}
+.info-grid2{display:flex;flex-direction:column;gap:.3rem;margin-top:.65rem}
+.table-wrap{overflow-x:auto;margin-top:.75rem}
+table{width:100%;border-collapse:collapse;font-size:.75rem;min-width:380px}
+thead th{background:var(--bg3);color:var(--gold);font-weight:800;padding:.55rem .7rem;text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--bdr-gold)}
+tbody td{padding:.55rem .7rem;color:var(--txt2);border-bottom:1px solid var(--bdr)}
+tbody tr:hover td{background:var(--glass);color:var(--txt)}
+
+/* ══ SCAN MODAL ══ */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);z-index:2000;display:none;align-items:flex-end;justify-content:center}
+.modal-ov.open{display:flex;animation:fadeIn .22s ease}
+.modal-sheet{background:var(--bg2);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:.5rem 1.25rem 2.5rem;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;position:relative;border-top:1px solid var(--bdr-gold);animation:slideUp .32s cubic-bezier(.34,1.56,.64,1)}
+.modal-sheet::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:34px;height:4px;background:var(--bdr);border-radius:var(--r-pill)}
+.modal-sheet h3{font-size:1.1rem;font-weight:900;color:var(--txt);margin:.8rem 0 .25rem;letter-spacing:-.02em}
+.modal-sheet p.sub{font-size:.78rem;color:var(--txt3);margin-bottom:.9rem}
+.modal-close{position:absolute;top:.9rem;right:1.1rem;width:28px;height:28px;background:var(--glass2);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:.82rem;transition:all .2s}
+.modal-close:hover{background:var(--bg3);color:var(--txt)}
+.scanner-body{display:flex;flex-direction:column;gap:.7rem}
+.cam-ctrl{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.cam-ctrl label{font-size:.72rem;color:var(--txt3);font-weight:700}
+.cam-select{flex:1;background:var(--bg3);border:1.5px solid var(--bdr);border-radius:8px;color:var(--txt);font-family:var(--font);font-size:.78rem;padding:.38rem .6rem;outline:none;min-width:110px;-webkit-appearance:none;appearance:none}
+#qrReader{width:100%;height:300px;position:relative;background:var(--bg3);border-radius:var(--r);overflow:hidden;border:1px solid var(--bdr)}
+.scan-frame-ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:2}
+.scan-frame{width:190px;height:190px;position:relative}
+.sc{position:absolute;width:24px;height:24px;border-color:var(--gold);border-style:solid}
+.sc-tl{top:0;left:0;border-width:3px 0 0 3px}.sc-tr{top:0;right:0;border-width:3px 3px 0 0}
+.sc-bl{bottom:0;left:0;border-width:0 0 3px 3px}.sc-br{bottom:0;right:0;border-width:0 3px 3px 0}
+.scan-line{position:absolute;left:0;right:0;height:2px;background:var(--grad-gold);box-shadow:0 0 8px var(--gold);animation:scanLine 2s linear infinite}
+.scan-status{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:.75rem;text-align:center}
+.scan-status p{font-size:.8rem;color:var(--txt2)}
+.scan-status.success{border-color:rgba(46,196,182,.3);background:rgba(46,196,182,.08)}
+.scan-status.success p{color:var(--green)}
+.scan-status.error{border-color:rgba(230,57,70,.3);background:rgba(230,57,70,.08)}
+.scan-status.error p{color:var(--red)}
+.scan-ico{font-size:1.4rem;margin-bottom:.3rem;display:block}
+.scan-ico.idle{background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.scan-ico.ok{color:var(--green)}.scan-ico.err{color:var(--red)}
+.store-sel-wrap{background:var(--bg3);border-radius:var(--r-sm);padding:.8rem;border:1px solid var(--bdr)}
+.store-sel-wrap label{font-size:.73rem;color:var(--txt3);font-weight:700;display:flex;align-items:center;gap:.35rem;margin-bottom:.35rem}
+.store-sel-wrap select{width:100%;background:var(--bg2);border:1.5px solid var(--bdr);border-radius:8px;color:var(--txt);font-family:var(--font);font-size:.82rem;padding:.42rem .7rem;outline:none;-webkit-appearance:none}
+.scan-acts{display:flex;gap:.45rem;flex-wrap:wrap}
+.scan-stats{display:flex;gap:.75rem;background:var(--bg3);border-radius:var(--r-sm);padding:.7rem 1rem;border:1px solid var(--bdr)}
+.ss-item{text-align:center;flex:1}
+.ss-val{font-size:1.05rem;font-weight:900;color:var(--gold);display:block;line-height:1}
+.ss-lbl{font-size:.62rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em}
+.hist-list{display:flex;flex-direction:column;gap:.4rem}
+.hist-item{display:flex;align-items:center;gap:.55rem;font-size:.75rem;color:var(--txt2);background:var(--bg3);border-radius:var(--r-sm);padding:.5rem .75rem;border:1px solid var(--bdr)}
+.hist-item i{color:var(--gold);font-size:.7rem;flex-shrink:0}
+
+/* Redeem modal */
+.curr-pts{font-size:.8rem;color:var(--txt3);margin-bottom:.85rem}.curr-pts strong{color:var(--gold)}
+.redeem-list{display:flex;flex-direction:column;gap:.55rem}
+.redeem-item{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:.8rem;display:flex;align-items:center;gap:.7rem;transition:all .2s}
+.redeem-item:hover{border-color:var(--bdr-gold)}.redeem-item.affordable{border-color:rgba(46,196,182,.28)}
+.ri-ico{width:44px;height:44px;border-radius:var(--r-sm);background:var(--gold-sub);border:1px solid var(--bdr-gold);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.ri-body{flex:1;min-width:0}
+.ri-name{font-size:.82rem;font-weight:800;color:var(--txt);margin-bottom:.15rem}
+.ri-desc{font-size:.7rem;color:var(--txt3);line-height:1.4;margin-bottom:.3rem}
+.ri-foot{display:flex;align-items:center;justify-content:space-between}
+.ri-pts{font-size:.8rem;font-weight:900;color:var(--gold);display:flex;align-items:center;gap:.25rem}
+.ri-pts i{font-size:.68rem}
+
+/* Share modal */
+.share-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin:1rem 0}
+.share-btn{display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.7rem .4rem;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r-sm);cursor:pointer;transition:all .2s;font-family:var(--font);font-size:.68rem;color:var(--txt3)}
+.share-btn:hover{border-color:var(--bdr-gold);color:var(--txt)}
+.share-btn i{font-size:1.15rem;color:var(--gold)}
+.preview-card{background:var(--grad-hero);border:1px solid var(--bdr-gold);border-radius:var(--r);padding:.9rem}
+.prev-head{display:flex;align-items:center;gap:.55rem;margin-bottom:.7rem}
+.prev-head i{font-size:1.8rem;color:var(--gold)}
+.prev-head h5{font-size:.88rem;font-weight:800;color:var(--txt);margin-bottom:.12rem}
+.prev-pts{display:flex;align-items:center;gap:.28rem;font-size:.75rem;color:var(--gold);font-weight:800}
+.prev-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
+.prev-stat{text-align:center}.prev-stat-n{font-size:1rem;font-weight:900;color:var(--gold);display:block}
+.prev-stat-l{font-size:.62rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em}
+
+/* Achat history */
+.achat-item{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:.75rem;display:flex;align-items:center;gap:.65rem;transition:border-color .2s;animation:fadeIn .3s ease}
+.achat-item:hover{border-color:rgba(0,180,162,.3)}
+.achat-ico{width:36px;height:36px;border-radius:50%;background:rgba(0,180,162,.15);color:var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem}
+.achat-body{flex:1;min-width:0}
+.achat-desc{font-size:.82rem;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.achat-meta{font-size:.68rem;color:var(--txt3);margin-top:.05rem}
+.achat-amount{font-size:.88rem;font-weight:900;color:var(--teal);flex-shrink:0}
+
+/* ── TOAST & POPUP ── */
+#toastWrap{position:fixed;bottom:calc(var(--nav-bot) + .75rem);left:50%;transform:translateX(-50%);z-index:9990;display:flex;flex-direction:column;gap:.4rem;width:calc(100% - 2rem);max-width:400px;pointer-events:none}
+.toast{padding:.7rem 1rem;border-radius:var(--r-sm);font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:.5rem;pointer-events:auto;animation:slideUp .28s ease;box-shadow:var(--s-deep);font-family:var(--font)}
+.toast.ok{background:var(--bg2);border:1px solid rgba(46,196,182,.35);color:var(--green)}
+.toast.err{background:var(--bg2);border:1px solid rgba(230,57,70,.35);color:var(--red)}
+.toast.info{background:var(--bg2);border:1px solid var(--bdr-gold);color:var(--gold)}
+.toast.warn{background:var(--bg2);border:1px solid rgba(255,165,0,.35);color:#ffa500}
+.pts-pop{position:fixed;top:calc(var(--nav-top) + 1rem);left:50%;transform:translateX(-50%);background:var(--grad-gold);color:#0a0e1a;font-family:var(--font);font-weight:900;font-size:1.05rem;padding:.6rem 1.4rem;border-radius:var(--r-pill);box-shadow:0 8px 32px rgba(201,168,76,.45);z-index:9989;white-space:nowrap;animation:popIn .45s cubic-bezier(.34,1.56,.64,1)}
+.load-ov{position:fixed;inset:0;background:rgba(10,14,26,.88);backdrop-filter:blur(8px);z-index:9998;display:none;align-items:center;justify-content:center}
+.load-ov.show{display:flex}
+.load-spin{width:46px;height:46px;border:3px solid var(--bdr);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto .7rem}
+.load-txt{font-size:.82rem;color:var(--txt3);text-align:center;font-family:var(--font)}
+
+/* Firebase mode indicator */
+.fb-mode{display:flex;align-items:center;gap:.35rem;font-size:.67rem;padding:.25rem .6rem;border-radius:var(--r-pill);font-weight:700}
+.fb-mode.live{background:rgba(46,196,182,.1);color:var(--teal);border:1px solid rgba(46,196,182,.25)}
+.fb-mode.demo{background:rgba(255,165,0,.1);color:#ffa500;border:1px solid rgba(255,165,0,.25)}
+
+@media(min-width:540px){
+  .quick-grid{grid-template-columns:repeat(4,1fr)}
+  .admin-stats{grid-template-columns:repeat(4,1fr)}
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+}
+@media(min-width:768px){
+  :root{--nav-bot:0px}
+  #botNav{display:none!important}
+  #mainApp{padding-bottom:0}
+  #toastWrap{bottom:.75rem}
+  .stores-list{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+  .modal-sheet{border-radius:var(--r-xl);max-width:500px}
+  .modal-ov{align-items:center;padding:1.5rem}
+  .auth-wrap{border-radius:var(--r-xl)}
+  #authOverlay{align-items:center}
+}
+@supports(padding-bottom:env(safe-area-inset-bottom)){
+  #botNav{padding-bottom:calc(env(safe-area-inset-bottom) + 6px);height:calc(var(--nav-bot) + env(safe-area-inset-bottom))}
+  #mainApp{padding-bottom:calc(var(--nav-bot) + env(safe-area-inset-bottom))}
+}
+</style>
+</head>
+<body>
+
+<div class="load-ov" id="loadOv"><div><div class="load-spin"></div><div class="load-txt">Loading…</div></div></div>
+<div id="toastWrap"></div>
+
+<!-- ══ AUTH ══ -->
+<div id="authOverlay">
+  <div class="auth-wrap">
+    <div class="auth-logo"><i class="fas fa-store-alt"></i><h2>Ottawa Arab Points</h2></div>
+    <p class="auth-sub">Earn rewards at local Arab stores in Ottawa</p>
+
+    <!-- Login -->
+    <div class="auth-form active" id="loginForm">
+      <h3>Welcome Back</h3>
+      <p>Sign in to your account</p>
+      <div class="firebase-badge" id="fbBadge"><i class="fas fa-circle-notch fa-spin"></i> Connecting to Firebase…</div>
+      <div class="fg"><label><i class="fas fa-envelope"></i>Email</label><input type="email" id="lEmail" placeholder="your@email.com"></div>
+      <div class="fg"><label><i class="fas fa-lock"></i>Password</label><input type="password" id="lPass" placeholder="••••••••"><button class="show-pwd" onclick="togglePwd('lPass',this)"><i class="fas fa-eye"></i></button></div>
+      <div class="form-opts">
+        <label class="rem-lbl"><input type="checkbox" id="remMe" style="accent-color:var(--gold);width:14px;height:14px"> Remember me</label>
+        <a class="auth-link" style="margin:0" onclick="showAuthPage('reset')">Forgot password?</a>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+      <div class="auth-divider"><span>or</span></div>
+      <button class="btn btn-secondary btn-full" onclick="showAuthPage('register')"><i class="fas fa-user-plus"></i> Create Account</button>
+      <div class="demo-box"><i class="fas fa-info-circle"></i><p>Demo (no Firebase): <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="bfdbdad2d0ffd0cbcbdec8dedecddeddcfd0d6d1cbcc91dcd0d2">[email&#160;protected]</a></strong> / <strong>demo123</strong><br>Admin: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b8dad7cdd0d7cdd4d9e7d5d7d0d9d5dddcd0dddcd1f8c1d9d0d7d796deca">[email&#160;protected]</a></strong></p></div>
+    </div>
+
+    <!-- Register -->
+    <div class="auth-form" id="registerForm">
+      <h3>Create Account</h3><p>Join Ottawa Arab Points today</p>
+      <div class="frow">
+        <div class="fg"><label><i class="fas fa-user"></i>First Name</label><input type="text" id="rFirst" placeholder="John"></div>
+        <div class="fg"><label><i class="fas fa-user"></i>Last Name</label><input type="text" id="rLast" placeholder="Doe"></div>
+      </div>
+      <div class="fg"><label><i class="fas fa-envelope"></i>Email</label><input type="email" id="rEmail" placeholder="your@email.com"></div>
+      <div class="fg"><label><i class="fas fa-phone"></i>Phone</label><input type="tel" id="rPhone" placeholder="(613) 123-4567"></div>
+      <div class="fg"><label><i class="fas fa-lock"></i>Password</label><input type="password" id="rPass" placeholder="Min 8 characters"><div class="pwd-hint">Must be at least 8 characters</div><button class="show-pwd" onclick="togglePwd('rPass',this)"><i class="fas fa-eye"></i></button></div>
+      <div class="fg"><label><i class="fas fa-lock"></i>Confirm Password</label><input type="password" id="rConfirm" placeholder="Confirm password"><button class="show-pwd" onclick="togglePwd('rConfirm',this)"><i class="fas fa-eye"></i></button></div>
+      <div class="fg"><label class="check-lbl"><input type="checkbox" id="agreeTerms"> <span>I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a></span></label></div>
+      <button class="btn btn-primary btn-full" onclick="doRegister()"><i class="fas fa-user-plus"></i> Create Account</button>
+      <div class="auth-divider"><span>or</span></div>
+      <button class="btn btn-secondary btn-full" onclick="showAuthPage('login')"><i class="fas fa-arrow-left"></i> Back to Sign In</button>
+    </div>
+
+    <!-- Reset -->
+    <div class="auth-form" id="resetForm">
+      <h3>Reset Password</h3><p>Enter your email to receive a reset link</p>
+      <div class="fg"><label><i class="fas fa-envelope"></i>Email</label><input type="email" id="rstEmail" placeholder="your@email.com"></div>
+      <button class="btn btn-primary btn-full" onclick="doReset()"><i class="fas fa-paper-plane"></i> Send Reset Link</button>
+      <div class="auth-divider"><span>or</span></div>
+      <button class="btn btn-secondary btn-full" onclick="showAuthPage('login')"><i class="fas fa-arrow-left"></i> Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOP NAV ══ -->
+<nav id="topNav">
+  <div class="nav-bar">
+    <button class="nav-logo" onclick="showPage('home')"><i class="fas fa-store-alt"></i><span>Ottawa <em>Arab Points</em></span></button>
+    <div class="nav-right">
+      <span class="admin-nav-badge hidden" id="adminNavBadge"><i class="fas fa-shield-alt"></i> Admin</span>
+      <div style="position:relative">
+        <button class="user-btn" id="userBtn" onclick="toggleDrop()">
+          <div class="uav" id="userAv">?</div>
+          <span id="userNameNav">User</span>
+          <div class="pts-pill"><i class="fas fa-coins"></i><span id="navPts">0</span></div>
+          <i class="fas fa-chevron-down" style="font-size:.65rem;color:var(--txt3)"></i>
+        </button>
+        <div class="user-drop" id="userDrop">
+          <div class="drop-head">
+            <div class="dav" id="dropAv">?</div>
+            <div><strong id="dropName">User</strong><small id="dropEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="85f0f6e0f7c5e0fde4e8f5e9e0abe6eae8">[email&#160;protected]</a></small></div>
+          </div>
+          <div class="drop-div"></div>
+          <button class="drop-item" onclick="showPage('profile');closeDrop()"><i class="fas fa-user"></i> My Profile</button>
+          <button class="drop-item" onclick="openModal('editProfileModal');closeDrop()"><i class="fas fa-cog"></i> Settings</button>
+          <button class="drop-item admin-item hidden" id="dropAdminBtn" onclick="showPage('admin');closeDrop()"><i class="fas fa-shield-alt"></i> Admin Panel</button>
+          <div class="drop-div"></div>
+          <button class="drop-item danger" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ MAIN APP ══ -->
+<div id="mainApp">
+
+  <!-- HOME -->
+  <div class="page active" id="pageHome">
+    <div class="container">
+      <div class="hero-card">
+        <h1>Earn Points at Arab Stores in Ottawa 🛒</h1>
+        <p>Shop, Scan QR codes &amp; redeem amazing rewards at participating stores across Ottawa</p>
+        <div class="hero-stats">
+          <div class="h-stat"><span class="h-stat-n" id="hStatStores">15+</span><span class="h-stat-l">Stores</span></div>
+          <div class="h-stat"><span class="h-stat-n" id="hStatMembers">5K+</span><span class="h-stat-l">Members</span></div>
+          <div class="h-stat"><span class="h-stat-n" id="hStatPts">100K</span><span class="h-stat-l">Points Given</span></div>
+        </div>
+      </div>
+      <div class="quick-grid">
+        <div class="q-card" onclick="showPage('stores')"><i class="fas fa-store"></i><h3>Browse Stores</h3><p>Find stores near you</p></div>
+        <div class="q-card" onclick="openModal('scanModal')"><i class="fas fa-qrcode"></i><h3>Scan QR</h3><p>Earn points now</p></div>
+        <div class="q-card" onclick="openModal('redeemModal')"><i class="fas fa-gift"></i><h3>Redeem</h3><p>Use your points</p></div>
+        <div class="q-card" onclick="showPage('profile')"><i class="fas fa-user"></i><h3>Profile</h3><p>View your stats</p></div>
+      </div>
+      <div class="sec-hdr"><h3 style="font-size:.88rem;font-weight:800;color:var(--txt)"><i class="fas fa-history" style="color:var(--gold);margin-right:.35rem"></i>Recent Activity</h3><button class="btn btn-ghost btn-sm" onclick="showPage('profile')">View All <i class="fas fa-arrow-right"></i></button></div>
+      <div class="act-list" id="homeActList"></div>
+    </div>
+  </div>
+
+  <!-- STORES -->
+  <div class="page" id="pageStores">
+    <div class="container">
+      <div class="sec-title"><i class="fas fa-store"></i>Stores</div>
+      <div class="filter-scroll" id="catChips"></div>
+      <div class="filter-bar">
+        <select id="areaFilter" onchange="renderStores()"><option value="all">All Areas</option><option value="Downtown">Downtown</option><option value="Bank Street">Bank Street</option><option value="Carling Avenue">Carling Avenue</option><option value="St. Laurent">St. Laurent</option><option value="Westboro">Westboro</option><option value="Rideau Street">Rideau Street</option></select>
+        <select id="storeSort" onchange="renderStores()"><option value="name">Name A–Z</option><option value="points">Points High–Low</option></select>
+        <button class="btn btn-ghost btn-sm" onclick="clearStoreFilters()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="res-cnt">Showing <strong id="storeShown">0</strong> of <strong id="storeTotal">0</strong> stores</div>
+      <div class="stores-list" id="storesList"></div>
+    </div>
+  </div>
+
+  <!-- REWARDS -->
+  <div class="page" id="pageRewards">
+    <div class="container">
+      <div class="sec-title"><i class="fas fa-gift"></i>Rewards</div>
+      <div class="filter-bar">
+        <select id="rPtsFilter" onchange="renderRewards()"><option value="all">All Points</option><option value="0-100">0–100</option><option value="101-300">101–300</option><option value="301-600">301–600</option><option value="601+">601+</option></select>
+        <select id="rTypeFilter" onchange="renderRewards()"><option value="all">All Types</option><option value="discount">Discounts</option><option value="food">Food</option><option value="giftcard">Gift Cards</option><option value="membership">Membership</option></select>
+        <select id="rSort" onchange="renderRewards()"><option value="points-asc">Points Low–High</option><option value="points-desc">Points High–Low</option></select>
+        <button class="btn btn-ghost btn-sm" onclick="clearRewardFilters()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="res-cnt">Showing <strong id="rwdShown">0</strong> of <strong id="rwdTotal">0</strong> rewards &nbsp;·&nbsp; You have <strong id="rwdUserPts" style="color:var(--gold)">0</strong> pts</div>
+      <div class="rewards-list" id="rewardsList"></div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="page" id="pageProfile">
+    <div class="container">
+      <div class="prof-hero">
+        <div class="prof-av-wrap"><i class="fas fa-user-circle"></i></div>
+        <div class="prof-name" id="profName">Welcome!</div>
+        <div class="pts-badge"><i class="fas fa-coins"></i><span id="profPts">0</span> Points</div>
+        <div class="prof-meta">
+          <span><i class="fas fa-envelope"></i><span id="profEmail">—</span></span>
+          <span><i class="fas fa-phone"></i><span id="profPhone">—</span></span>
+        </div>
+      </div>
+      <div class="prof-acts">
+        <button class="btn btn-primary" onclick="openModal('scanModal')"><i class="fas fa-qrcode"></i> Scan</button>
+        <button class="btn btn-secondary" onclick="openModal('redeemModal')"><i class="fas fa-gift"></i> Redeem</button>
+        <button class="btn btn-ghost" onclick="openModal('shareModal')"><i class="fas fa-share-alt"></i> Share</button>
+        <button class="btn btn-ghost" onclick="openModal('editProfileModal')"><i class="fas fa-edit"></i> Edit</button>
+      </div>
+      <div class="prof-section">
+        <h3><i class="fas fa-chart-bar"></i>Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-box"><div class="sico"><i class="fas fa-store"></i></div><div><span class="sval" id="statStores">0</span><span class="slbl">Stores</span></div></div>
+          <div class="stat-box"><div class="sico"><i class="fas fa-trophy"></i></div><div><span class="sval" id="statRewards">0</span><span class="slbl">Rewards</span></div></div>
+          <div class="stat-box"><div class="sico"><i class="fas fa-calendar"></i></div><div><span class="sval" id="statSince">2024</span><span class="slbl">Member Since</span></div></div>
+          <div class="stat-box"><div class="sico"><i class="fas fa-star"></i></div><div><span class="sval" id="statLevel">Bronze</span><span class="slbl">Level</span></div></div>
+        </div>
+      </div>
+      <div class="prof-section">
+        <h3><i class="fas fa-chart-line"></i>Points Progress</h3>
+        <div class="prog-bar-bg"><div class="prog-bar-fill" id="progFill" style="width:0%"></div></div>
+        <div class="prog-labels"><span>Bronze (0)</span><span id="progCurr">0 pts</span><span>Gold (2000)</span></div>
+        <div class="lvl-desc" id="lvlDesc">Earn more points to level up!</div>
+      </div>
+      <div class="prof-section">
+        <div class="sec-hdr"><h3><i class="fas fa-history"></i>Activity</h3><button class="btn btn-ghost btn-sm" onclick="loadAllActivity()">View All</button></div>
+        <div class="act-list" id="profActList"></div>
+      </div>
+      <!-- Achat History (purchases) -->
+      <div class="prof-section" id="achatSection">
+        <h3><i class="fas fa-shopping-bag" style="color:var(--teal)"></i>My Purchases</h3>
+        <div id="achatList"><div class="empty-msg"><i class="fas fa-shopping-bag"></i><p>No purchases yet</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ADMIN PAGE ══ -->
+  <div class="page" id="pageAdmin">
+    <div class="container">
+      <div class="sec-title"><i class="fas fa-shield-alt admin-icon"></i>Admin Dashboard</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+        <div class="fb-mode" id="fbModeIndicator"><i class="fas fa-circle"></i> Loading…</div>
+        <button class="btn btn-ghost btn-sm" onclick="refreshAdmin()"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
+      <div class="admin-hero"><i class="fas fa-store-alt"></i><div><h3>Store Management Portal</h3><p>Manage users, QR codes, stores, offers &amp; purchases</p></div></div>
+
+      <!-- Admin Stats -->
+      <div class="admin-stats">
+        <div class="stat-box"><div class="sico"><i class="fas fa-users" style="color:#a855f7"></i></div><div><span class="sval" id="aUsers">0</span><span class="slbl">Users</span></div></div>
+        <div class="stat-box"><div class="sico"><i class="fas fa-qrcode"></i></div><div><span class="sval" id="aTotalScans">0</span><span class="slbl">Scans</span></div></div>
+        <div class="stat-box"><div class="sico"><i class="fas fa-coins"></i></div><div><span class="sval" id="aPtsGiven">0</span><span class="slbl">Pts Given</span></div></div>
+        <div class="stat-box"><div class="sico"><i class="fas fa-calendar-day"></i></div><div><span class="sval" id="aTodayScans">0</span><span class="slbl">Today</span></div></div>
+      </div>
+
+      <!-- ── USER MANAGEMENT ── -->
+      <div class="admin-section">
+        <div class="sec-hdr"><h3><i class="fas fa-users purple"></i> User Management</h3><button class="btn btn-admin btn-sm" onclick="toggleForm('addUserForm')"><i class="fas fa-user-plus"></i> Add User</button></div>
+        <div class="form-box admin-form" id="addUserForm">
+          <h4><i class="fas fa-user-plus"></i> Add New User</h4>
+          <div class="frow">
+            <div class="fg"><label><i class="fas fa-user"></i>First Name *</label><input type="text" id="auFirst" placeholder="First"></div>
+            <div class="fg"><label><i class="fas fa-user"></i>Last Name *</label><input type="text" id="auLast" placeholder="Last"></div>
+          </div>
+          <div class="fg"><label><i class="fas fa-envelope"></i>Email *</label><input type="email" id="auEmail" placeholder="user@email.com"></div>
+          <div class="fg"><label><i class="fas fa-lock"></i>Password *</label><input type="password" id="auPass" placeholder="Min 8 chars"><button class="show-pwd" onclick="togglePwd('auPass',this)"><i class="fas fa-eye"></i></button></div>
+          <div class="fg"><label><i class="fas fa-phone"></i>Phone</label><input type="tel" id="auPhone" placeholder="(613) 123-4567"></div>
+          <div class="frow">
+            <div class="fg"><label><i class="fas fa-coins"></i>Initial Points</label><input type="number" id="auPts" value="0" min="0"></div>
+            <div class="fg"><label><i class="fas fa-shield-alt"></i>Role</label><select id="auRole"><option value="user">User</option><option value="admin">Admin</option></select></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-secondary btn-sm" onclick="toggleForm('addUserForm')">Cancel</button>
+            <button class="btn btn-admin btn-sm" onclick="adminAddUser()"><i class="fas fa-user-plus"></i> Create User</button>
+          </div>
+        </div>
+        <!-- Edit User Form -->
+        <div class="form-box admin-form" id="editUserForm" style="display:none">
+          <h4><i class="fas fa-user-edit"></i> Edit User</h4>
+          <input type="hidden" id="euId">
+          <div class="frow">
+            <div class="fg"><label><i class="fas fa-user"></i>First Name</label><input type="text" id="euFirst"></div>
+            <div class="fg"><label><i class="fas fa-user"></i>Last Name</label><input type="text" id="euLast"></div>
+          </div>
+          <div class="fg"><label><i class="fas fa-envelope"></i>Email</label><input type="email" id="euEmail"></div>
+          <div class="fg"><label><i class="fas fa-phone"></i>Phone</label><input type="tel" id="euPhone"></div>
+          <div class="frow">
+            <div class="fg"><label><i class="fas fa-coins"></i>Points</label><input type="number" id="euPts" min="0"></div>
+            <div class="fg"><label><i class="fas fa-shield-alt"></i>Role</label><select id="euRole"><option value="user">User</option><option value="admin">Admin</option></select></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-secondary btn-sm" onclick="closeEditUser()">Cancel</button>
+            <button class="btn btn-admin btn-sm" onclick="adminSaveUser()"><i class="fas fa-save"></i> Save Changes</button>
+          </div>
+        </div>
+        <div class="mgmt-list" id="userMgmtList"><div class="empty-msg"><i class="fas fa-users"></i><p>Loading users…</p></div></div>
+      </div>
+
+      <!-- ── QR GENERATOR ── -->
+      <div class="admin-section">
+        <h3><i class="fas fa-qrcode"></i> QR Code Generator</h3>
+        <div class="fg"><label><i class="fas fa-store"></i>Select Store</label><select id="qrStoreSelect" onchange="onQRStoreChange()"><option value="">— select a store —</option></select></div>
+        <div class="qr-zone" id="qrZone"><div class="qr-placeholder"><i class="fas fa-qrcode"></i><p>Select a store above</p></div></div>
+        <div class="qr-controls">
+          <button class="btn btn-primary btn-sm" id="genQRBtn" onclick="generateQR()" disabled><i class="fas fa-bolt"></i> Generate</button>
+          <button class="btn btn-secondary btn-sm" id="dlQRBtn" onclick="downloadQR()" disabled><i class="fas fa-download"></i> Download</button>
+          <button class="btn btn-ghost btn-sm" id="printQRBtn" onclick="printQR()" disabled><i class="fas fa-print"></i> Print</button>
+        </div>
+        <div class="qr-info" id="qrInfo" style="display:none">
+          <h4>QR Info</h4>
+          <div class="info-row"><span class="lbl">Store ID</span><span class="val" id="qrSid">—</span></div>
+          <div class="info-row"><span class="lbl">Store Name</span><span class="val" id="qrSname">—</span></div>
+          <div class="info-row"><span class="lbl">Points/Scan</span><span class="val" id="qrSpts">—</span></div>
+          <div class="info-row"><span class="lbl">Generated</span><span class="val" id="qrSgen">—</span></div>
+        </div>
+      </div>
+
+      <!-- ── STORE MANAGEMENT ── -->
+      <div class="admin-section">
+        <div class="sec-hdr"><h3><i class="fas fa-store"></i> Store Management</h3><button class="btn btn-primary btn-sm" onclick="toggleForm('storeForm')"><i class="fas fa-plus"></i> Add Store</button></div>
+        <div class="form-box" id="storeForm">
+          <h4><i class="fas fa-store"></i> Add / Edit Store</h4>
+          <input type="hidden" id="sfId">
+          <div class="frow">
+            <div class="fg"><label><i class="fas fa-signature"></i>Name *</label><input type="text" id="sfName" placeholder="Store name"></div>
+            <div class="fg"><label><i class="fas fa-tag"></i>Category *</label><select id="sfCat"><option value="Grocery">Grocery</option><option value="Restaurant">Restaurant</option><option value="Bakery">Bakery</option><option value="Cafe">Cafe</option><option value="Market">Market</option><option value="Other">Other</option></select></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label><i class="fas fa-map-marker-alt"></i>Location *</label><input type="text" id="sfLoc" placeholder="Area / address"></div>
+            <div class="fg"><label><i class="fas fa-coins"></i>Points/Scan *</label><input type="number" id="sfPts" value="50" min="1" max="1000"></div>
+          </div>
+          <div class="fg"><label><i class="fas fa-align-left"></i>Description</label><textarea id="sfDesc" rows="2" placeholder="Short description"></textarea></div>
+          <div class="fg"><label class="check-lbl"><input type="checkbox" id="sfActive" checked><span>Store is active</span></label></div>
+          <div class="form-actions">
+            <button class="btn btn-secondary btn-sm" onclick="toggleForm('storeForm')">Cancel</button>
+            <button class="btn btn-primary btn-sm" onclick="saveStore()"><i class="fas fa-save"></i> Save</button>
+          </div>
+        </div>
+        <div class="mgmt-list" id="storeMgmtList"></div>
+      </div>
+
+      <!-- ── OFFER / REWARD MANAGEMENT ── -->
+      <div class="admin-section">
+        <div class="sec-hdr"><h3><i class="fas fa-gift"></i> Offers & Rewards</h3><button class="btn btn-primary btn-sm" onclick="toggleForm('rewardForm')"><i class="fas fa-plus"></i> Add Offer</button></div>
+        <div class="form-box" id="rewardForm">
+          <h4><i class="fas fa-gift"></i> Add / Edit Offer</h4>
+          <input type="hidden" id="rfId">
+          <div class="frow">
+            <div class="fg"><label><i class="fas fa-signature"></i>Name *</label><input type="text" id="rfName" placeholder="Offer name"></div>
+            <div class="fg"><label><i class="fas fa-tag"></i>Type *</label><select id="rfType"><option value="discount">Discount</option><option value="food">Food Item</option><option value="giftcard">Gift Card</option><option value="membership">Membership</option><option value="service">Service</option><option value="other">Other</option></select></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label><i class="fas fa-coins"></i>Points Required *</label><input type="number" id="rfPts" value="100" min="1"></div>
+            <div class="fg"><label><i class="fas fa-store"></i>Linked Store (opt.)</label><select id="rfStore"><option value="">All Stores</option></select></div>
+          </div>
+          <div class="fg"><label><i class="fas fa-calendar-alt"></i>Expiry Date (opt.)</label><input type="date" id="rfExpiry"></div>
+          <div class="fg"><label><i class="fas fa-align-left"></i>Description *</label><textarea id="rfDesc" rows="2" placeholder="Offer description"></textarea></div>
+          <div class="fg"><label class="check-lbl"><input type="checkbox" id="rfActive" checked><span>Offer is active</span></label></div>
+          <div class="form-actions">
+            <button class="btn btn-secondary btn-sm" onclick="toggleForm('rewardForm')">Cancel</button>
+            <button class="btn btn-primary btn-sm" onclick="saveReward()"><i class="fas fa-save"></i> Save</button>
+          </div>
+        </div>
+        <div class="mgmt-list" id="rewardMgmtList"></div>
+      </div>
+
+      <!-- ── ACHAT / PURCHASE MANAGEMENT ── -->
+      <div class="admin-section">
+        <div class="sec-hdr"><h3><i class="fas fa-shopping-bag" style="color:var(--teal)"></i> Purchase / Achat Management</h3><button class="btn btn-teal btn-sm" onclick="toggleAchat('achatForm')"><i class="fas fa-plus"></i> Add Purchase</button></div>
+        <div class="achat-form-box" id="achatForm">
+          <h4><i class="fas fa-shopping-cart"></i> Record Purchase</h4>
+          <div class="frow">
+            <div class="fg"><label><i class="fas fa-user"></i>User *</label><select id="acUser"><option value="">— select user —</option></select></div>
+            <div class="fg"><label><i class="fas fa-store"></i>Store *</label><select id="acStore"><option value="">— select store —</option></select></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label><i class="fas fa-dollar-sign"></i>Amount (CAD) *</label><input type="number" id="acAmount" placeholder="0.00" step="0.01" min="0"></div>
+            <div class="fg"><label><i class="fas fa-coins"></i>Points to Award</label><input type="number" id="acPtsOverride" placeholder="Auto-calc" min="0"></div>
+          </div>
+          <div class="fg"><label><i class="fas fa-align-left"></i>Notes</label><input type="text" id="acNotes" placeholder="Optional notes"></div>
+          <div class="form-actions">
+            <button class="btn btn-secondary btn-sm" onclick="toggleAchat('achatForm')">Cancel</button>
+            <button class="btn btn-teal btn-sm" onclick="saveAchat()"><i class="fas fa-check"></i> Record Purchase</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Date</th><th>User</th><th>Store</th><th>Amount</th><th>Pts</th><th></th></tr></thead>
+          <tbody id="achatTbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS & ANALYTICS ── -->
+      <div class="admin-section">
+        <h3><i class="fas fa-cog"></i> Settings & Data</h3>
+        <div class="settings-grid">
+          <div class="setting-card"><div class="setting-ico"><i class="fas fa-coins"></i></div><div class="setting-body"><h4>Default Points/Scan</h4><p>Applied when adding new stores</p><div class="pts-set"><input type="number" id="defPts" value="50" min="1" max="1000"><button class="btn btn-primary btn-sm" onclick="updateDefPts()"><i class="fas fa-save"></i></button></div></div></div>
+          <div class="setting-card"><div class="setting-ico"><i class="fas fa-download"></i></div><div class="setting-body"><h4>Export Data</h4><p>Download scan history as CSV</p><button class="btn btn-primary btn-sm" onclick="exportCSV()"><i class="fas fa-file-export"></i> Export CSV</button></div></div>
+          <div class="setting-card"><div class="setting-ico"><i class="fas fa-database"></i></div><div class="setting-body"><h4>Export All</h4><p>Full JSON backup</p><button class="btn btn-secondary btn-sm" onclick="exportAll()"><i class="fas fa-file-export"></i> Export JSON</button></div></div>
+          <div class="setting-card"><div class="setting-ico"><i class="fas fa-redo"></i></div><div class="setting-body"><h4>Reset Demo Data</h4><p>Restore sample data</p><button class="btn btn-danger btn-sm" onclick="resetData()"><i class="fas fa-redo"></i> Reset</button></div></div>
+        </div>
+        <div class="gold-line"></div>
+        <h4 style="font-size:.82rem;font-weight:800;color:var(--txt);margin-bottom:.55rem">System Info</h4>
+        <div class="info-grid2">
+          <div class="info-row"><span class="lbl">Total Users</span><span class="val" id="siUsers">—</span></div>
+          <div class="info-row"><span class="lbl">Total Stores</span><span class="val" id="siStores">—</span></div>
+          <div class="info-row"><span class="lbl">Total Offers</span><span class="val" id="siRewards">—</span></div>
+          <div class="info-row"><span class="lbl">Transactions</span><span class="val" id="siTx">—</span></div>
+          <div class="info-row"><span class="lbl">Purchases</span><span class="val" id="siAchats">—</span></div>
+          <div class="info-row"><span class="lbl">Last Updated</span><span class="val" id="siTime">—</span></div>
+        </div>
+      </div>
+
+      <!-- Analytics table -->
+      <div class="admin-section">
+        <h3><i class="fas fa-chart-bar"></i> Recent Scan Activity</h3>
+        <div class="table-wrap"><table><thead><tr><th>Date</th><th>Time</th><th>Customer</th><th>Store</th><th>Pts</th></tr></thead><tbody id="scansTbody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /mainApp -->
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav id="botNav">
+  <button class="bn-item active" id="bn-home" onclick="showPage('home')"><i class="fas fa-home"></i><span>Home</span></button>
+  <button class="bn-item" id="bn-stores" onclick="showPage('stores')"><i class="fas fa-store"></i><span>Stores</span></button>
+  <button class="bn-item bn-scan" onclick="openModal('scanModal')"><div class="scan-wrap"><i class="fas fa-qrcode"></i></div><span>Scan</span></button>
+  <button class="bn-item" id="bn-rewards" onclick="showPage('rewards')"><i class="fas fa-gift"></i><span>Rewards</span></button>
+  <button class="bn-item" id="bn-profile" onclick="showPage('profile')"><i class="fas fa-user"></i><span>Profile</span></button>
+  <button class="bn-item admin-nav-item hidden" id="bn-admin" onclick="showPage('admin')"><i class="fas fa-shield-alt"></i><span>Admin</span></button>
+</nav>
+
+<!-- ══ MODALS ══ -->
+<!-- QR Scanner -->
+<div class="modal-ov" id="scanModal">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="closeModal('scanModal');stopScanner()"><i class="fas fa-times"></i></button>
+    <h3>Scan Store QR Code</h3><p class="sub">Point your camera at the store QR code to earn points</p>
+    <div class="scanner-body">
+      <div class="cam-ctrl"><label><i class="fas fa-video" style="color:var(--gold);font-size:.68rem"></i> Camera</label><select class="cam-select" id="camSel"><option>Loading…</option></select><button class="btn btn-ghost btn-sm" onclick="switchCam()"><i class="fas fa-sync-alt"></i></button></div>
+      <div style="position:relative;border-radius:var(--r);overflow:hidden"><div id="qrReader"></div><div class="scan-frame-ov"><div class="scan-frame"><div class="sc sc-tl"></div><div class="sc sc-tr"></div><div class="sc sc-bl"></div><div class="sc sc-br"></div><div class="scan-line"></div></div></div></div>
+      <div class="scan-status" id="scanStatus"><span class="scan-ico idle fas fa-qrcode"></span><p id="scanMsg">Ready to scan — point camera at QR code</p></div>
+      <div class="store-sel-wrap"><label><i class="fas fa-hand-pointer"></i> Or select store manually:</label><select id="manualStore"><option value="">— select store —</option></select></div>
+      <div class="scan-acts">
+        <button class="btn btn-primary btn-sm" id="startScanBtn" onclick="startScanner()"><i class="fas fa-play"></i> Start Camera</button>
+        <button class="btn btn-secondary btn-sm" id="stopScanBtn" onclick="stopScanner()" disabled><i class="fas fa-stop"></i> Stop</button>
+        <button class="btn btn-primary btn-sm" onclick="confirmManual()"><i class="fas fa-check"></i> Confirm Manual</button>
+      </div>
+      <div class="scan-stats">
+        <div class="ss-item"><span class="ss-val" id="ssToday">0</span><span class="ss-lbl">Today's Scans</span></div>
+        <div class="ss-item"><span class="ss-val" id="ssLast">—</span><span class="ss-lbl">Last Scan</span></div>
+        <div class="ss-item"><span class="ss-val" id="ssTotalPts">0</span><span class="ss-lbl">Total Points</span></div>
+      </div>
+      <div><div style="font-size:.78rem;font-weight:800;color:var(--txt);margin-bottom:.4rem;display:flex;align-items:center;gap:.35rem"><i class="fas fa-history" style="color:var(--gold);font-size:.72rem"></i> Recent Scans</div><div class="hist-list" id="scanHist"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Redeem -->
+<div class="modal-ov" id="redeemModal">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="closeModal('redeemModal')"><i class="fas fa-times"></i></button>
+    <h3>Redeem Points</h3><p class="curr-pts">Balance: <strong id="redPts">0</strong> points</p>
+    <div class="fg" style="margin-bottom:.85rem"><label><i class="fas fa-filter"></i>Filter</label><select id="redFilter" onchange="renderRedeemList()"><option value="all">All Rewards</option><option value="affordable">I Can Afford</option><option value="0-100">0–100 pts</option><option value="101-300">101–300 pts</option><option value="301-600">301–600 pts</option></select></div>
+    <div class="redeem-list" id="redeemList"></div>
+  </div>
+</div>
+
+<!-- Edit Profile -->
+<div class="modal-ov" id="editProfileModal">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="closeModal('editProfileModal')"><i class="fas fa-times"></i></button>
+    <h3>Edit Profile</h3>
+    <div class="frow"><div class="fg"><label><i class="fas fa-user"></i>First Name</label><input type="text" id="epFirst"></div><div class="fg"><label><i class="fas fa-user"></i>Last Name</label><input type="text" id="epLast"></div></div>
+    <div class="fg"><label><i class="fas fa-envelope"></i>Email</label><input type="email" id="epEmail"></div>
+    <div class="fg"><label><i class="fas fa-phone"></i>Phone</label><input type="tel" id="epPhone"></div>
+    <div class="fg"><label><i class="fas fa-home"></i>Address</label><input type="text" id="epAddr"></div>
+    <div class="fg"><label><i class="fas fa-lock"></i>New Password (blank = keep current)</label><input type="password" id="epPass" placeholder="New password"><button class="show-pwd" onclick="togglePwd('epPass',this)"><i class="fas fa-eye"></i></button></div>
+    <div class="fg"><label class="check-lbl"><input type="checkbox" id="epNotif" checked><span>Receive reward notifications</span></label></div>
+    <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal('editProfileModal')">Cancel</button><button class="btn btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> Save</button></div>
+  </div>
+</div>
+
+<!-- Share -->
+<div class="modal-ov" id="shareModal">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="closeModal('shareModal')"><i class="fas fa-times"></i></button>
+    <h3>Share Your Profile</h3><p class="sub">Share your points and achievements with friends!</p>
+    <div class="share-grid">
+      <button class="share-btn" onclick="socialShare('twitter')"><i class="fab fa-twitter"></i><span>Twitter</span></button>
+      <button class="share-btn" onclick="socialShare('facebook')"><i class="fab fa-facebook"></i><span>Facebook</span></button>
+      <button class="share-btn" onclick="socialShare('whatsapp')"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></button>
+      <button class="share-btn" onclick="copyLink()"><i class="fas fa-link"></i><span>Copy Link</span></button>
+    </div>
+    <h4 style="font-size:.78rem;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.55rem">Preview</h4>
+    <div class="preview-card">
+      <div class="prev-head"><i class="fas fa-user-circle"></i><div><h5 id="prevName">User</h5><div class="prev-pts"><i class="fas fa-coins"></i><span id="prevPts">0</span> pts</div></div></div>
+      <div class="prev-stats">
+        <div class="prev-stat"><span class="prev-stat-n" id="prevStores">0</span><span class="prev-stat-l">Stores</span></div>
+        <div class="prev-stat"><span class="prev-stat-n" id="prevRwds">0</span><span class="prev-stat-l">Rewards</span></div>
+        <div class="prev-stat"><span class="prev-stat-n" id="prevLvl">Bronze</span><span class="prev-stat-l">Level</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ JAVASCRIPT ══ -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+const CAT_ICONS={Grocery:'🛒',Restaurant:'🍽️',Bakery:'🥖',Cafe:'☕',Market:'🏪',Other:'🏬'};
+const ADMIN_EMAIL='bouhoula_mohamedhedi@yahoo.fr';
+
+// ── LOCAL DB (fallback) ──
+let DB={
+  users:[
+    {id:'u1',email:'demo@ottawaarabpoints.com',password:'demo123',firstName:'Ahmed',lastName:'Hassan',phone:'(613) 555-0101',address:'123 Bank St',points:850,joinDate:'2024-01-15',notifications:true,storesVisited:6,rewardsEarned:3,role:'user',activity:[
+      {id:'a1',type:'earn',store:'Al-Salam Grocery',points:50,date:'2025-03-18T10:22:00'},
+      {id:'a2',type:'earn',store:'Beirut Bakery',points:75,date:'2025-03-16T14:05:00'},
+      {id:'a3',type:'redeem',store:'Ottawa Arab Points',points:-200,date:'2025-03-10T09:30:00'},
+    ]},
+    {id:'admin1',email:ADMIN_EMAIL,password:'admin123',firstName:'Mohamed',lastName:'Bouhoula',phone:'(613) 555-9999',address:'Ottawa Admin',points:9999,joinDate:'2024-01-01',notifications:true,storesVisited:15,rewardsEarned:10,role:'admin',activity:[]},
+  ],
+  stores:[
+    {id:'s1',name:'Al-Salam Grocery',category:'Grocery',location:'Bank Street',points:50,description:'Fresh Middle Eastern groceries, halal meat, imported spices.',active:true,scans:142},
+    {id:'s2',name:'Beirut Bakery',category:'Bakery',location:'Carling Avenue',points:75,description:'Authentic Lebanese bread, pastries & fresh pita baked daily.',active:true,scans:98},
+    {id:'s3',name:'Damascus Restaurant',category:'Restaurant',location:'Downtown',points:100,description:'Traditional Syrian cuisine — shawarma, falafel, hummus.',active:true,scans:76},
+    {id:'s4',name:'Nile Market',category:'Market',location:'St. Laurent',points:60,description:'Egyptian & North African grocery products.',active:true,scans:64},
+    {id:'s5',name:'Arabian Nights Cafe',category:'Cafe',location:'Westboro',points:40,description:'Arabic coffee, tea & light bites.',active:true,scans:55},
+    {id:'s6',name:'Jeddah Grocery',category:'Grocery',location:'Rideau Street',points:55,description:'Saudi & Gulf region specialty foods.',active:false,scans:28},
+  ],
+  rewards:[
+    {id:'r1',name:'$5 Off Any Purchase',type:'discount',points:100,description:'Get $5 off your next purchase.',active:true,storeId:'',expiry:''},
+    {id:'r2',name:'Free Pita Bread',type:'food',points:150,description:'Free bag of fresh pita bread.',active:true,storeId:'s2',expiry:''},
+    {id:'r3',name:'$10 Gift Card',type:'giftcard',points:300,description:'$10 Ottawa Arab Points gift card.',active:true,storeId:'',expiry:''},
+    {id:'r4',name:'$20 Off Purchase',type:'discount',points:500,description:'$20 discount on your next shopping trip.',active:true,storeId:'',expiry:''},
+    {id:'r5',name:'Free Meal Combo',type:'food',points:400,description:'Free meal combo at Damascus Restaurant.',active:true,storeId:'s3',expiry:''},
+    {id:'r6',name:'1-Month VIP Membership',type:'membership',points:800,description:'VIP member status for 30 days: double points.',active:true,storeId:'',expiry:''},
+    {id:'r9',name:'Free Coffee',type:'food',points:80,description:'Free Arabic coffee at Arabian Nights Cafe.',active:true,storeId:'s5',expiry:''},
+  ],
+  transactions:[
+    {id:'t1',userId:'u1',userName:'Ahmed Hassan',storeId:'s1',storeName:'Al-Salam Grocery',points:50,date:'2025-03-18T10:22:00'},
+    {id:'t2',userId:'u1',userName:'Ahmed Hassan',storeId:'s2',storeName:'Beirut Bakery',points:75,date:'2025-03-16T14:05:00'},
+  ],
+  achats:[
+    {id:'ac1',userId:'u1',userName:'Ahmed Hassan',storeId:'s1',storeName:'Al-Salam Grocery',amount:45.00,points:50,notes:'Weekly groceries',date:'2025-03-18T10:00:00'},
+  ],
+  config:{defPts:50,version:'3.0'}
+};
+
+let CU=null;
+let IS_ADMIN=false;
+let fbMode=false; // true if Firebase is working
+let catFilter='all';
+let scannerActive=false;
+let html5QrCode=null;
+let scansToday=0;
+let lastScanTime='—';
+
+// ── PERSISTENCE ──
+function saveDB(){try{localStorage.setItem('oap_db3',JSON.stringify(DB));}catch(e){}}
+function loadDB(){try{const d=localStorage.getItem('oap_db3');if(d)DB=JSON.parse(d);}catch(e){}}
+loadDB();
+
+// ── FIREBASE READY ──
+window.addEventListener('firebase-ready',()=>{
+  fbMode=window.__fbReady===true;
+  updateFbBadge();
+  // Check for existing session via Firebase
+  if(fbMode){
+    window.__fb.onAuthStateChanged(async(user)=>{
+      if(user&&!CU){
+        // Load user from Firestore
+        try{
+          const snap=await window.__fb.getDoc(window.__fb.docRef('users',user.uid));
+          if(snap.exists()){
+            CU={id:user.uid,...snap.data()};
+            IS_ADMIN=checkAdmin(CU.email);
+            initApp();
+          }
+        }catch(e){console.warn('Firestore read error:',e);}
+      }
+    });
+  } else {
+    // Try local auto-login
+    const sid=localStorage.getItem('oap_cu');
+    if(sid){const u=DB.users.find(x=>x.id===sid);if(u){CU=u;IS_ADMIN=checkAdmin(u.email);setTimeout(initApp,100);}}
+  }
+  updateFbBadge();
+});
+
+function updateFbBadge(){
+  const badge=document.getElementById('fbBadge');
+  const ind=document.getElementById('fbModeIndicator');
+  if(badge){
+    badge.innerHTML=fbMode?
+      '<i class="fas fa-fire" style="color:#ffa000"></i> Firebase Connected — Auth is live':
+      '<i class="fas fa-hdd"></i> Demo Mode — configure Firebase for live auth';
+  }
+  if(ind){
+    ind.className='fb-mode '+(fbMode?'live':'demo');
+    ind.innerHTML=fbMode?'<i class="fas fa-fire"></i> Firebase Live':'<i class="fas fa-hdd"></i> Demo Mode';
+  }
+}
+
+function checkAdmin(email){return email&&email.toLowerCase()===ADMIN_EMAIL.toLowerCase();}
+
+// ── AUTH ──
+function showAuthPage(p){
+  document.querySelectorAll('.auth-form').forEach(f=>f.classList.remove('active'));
+  const map={login:'loginForm',register:'registerForm',reset:'resetForm'};
+  document.getElementById(map[p]).classList.add('active');
+}
+
+function togglePwd(id,btn){
+  const inp=document.getElementById(id);
+  const show=inp.type==='password';
+  inp.type=show?'text':'password';
+  btn.innerHTML=show?'<i class="fas fa-eye-slash"></i>':'<i class="fas fa-eye"></i>';
+}
+
+async function doLogin(){
+  const em=(document.getElementById('lEmail').value.trim()||'demo@ottawaarabpoints.com').toLowerCase();
+  const pw=document.getElementById('lPass').value||'demo123';
+  showLoad(true);
+  if(fbMode){
+    try{
+      const cred=await window.__fb.signInWithEmailAndPassword(em,pw);
+      const snap=await window.__fb.getDoc(window.__fb.docRef('users',cred.user.uid));
+      if(snap.exists()){
+        CU={id:cred.user.uid,...snap.data()};
+      } else {
+        // Create profile if missing
+        CU={id:cred.user.uid,email:em,firstName:em.split('@')[0],lastName:'',phone:'',address:'',points:0,joinDate:new Date().toISOString().split('T')[0],notifications:true,storesVisited:0,rewardsEarned:0,role:checkAdmin(em)?'admin':'user',activity:[]};
+        await window.__fb.setDoc(window.__fb.docRef('users',cred.user.uid),CU);
+      }
+      IS_ADMIN=checkAdmin(em)||CU.role==='admin';
+      if(document.getElementById('remMe').checked)localStorage.setItem('oap_cu',cred.user.uid);
+      showLoad(false);initApp();
+    }catch(e){showLoad(false);toast(e.code==='auth/wrong-password'?'Wrong password':e.code==='auth/user-not-found'?'No account found':'Login error: '+e.message,'err');}
+  } else {
+    const user=DB.users.find(u=>u.email.toLowerCase()===em&&u.password===pw);
+    if(!user){showLoad(false);toast('Invalid email or password','err');return;}
+    CU=user;IS_ADMIN=checkAdmin(em)||user.role==='admin';
+    if(document.getElementById('remMe').checked)localStorage.setItem('oap_cu',user.id);
+    showLoad(false);initApp();
+  }
+}
+
+async function doRegister(){
+  const first=document.getElementById('rFirst').value.trim();
+  const last=document.getElementById('rLast').value.trim();
+  const em=document.getElementById('rEmail').value.trim().toLowerCase();
+  const phone=document.getElementById('rPhone').value.trim();
+  const pw=document.getElementById('rPass').value;
+  const conf=document.getElementById('rConfirm').value;
+  const terms=document.getElementById('agreeTerms').checked;
+  if(!first||!last||!em||!pw){toast('Please fill all required fields','err');return;}
+  if(pw.length<8){toast('Password must be 8+ characters','err');return;}
+  if(pw!==conf){toast('Passwords do not match','err');return;}
+  if(!terms){toast('Please agree to the terms','err');return;}
+  showLoad(true);
+  const isAdmin=checkAdmin(em);
+  const role=isAdmin?'admin':'user';
+  if(fbMode){
+    try{
+      const cred=await window.__fb.createUserWithEmailAndPassword(em,pw);
+      CU={id:cred.user.uid,email:em,firstName:first,lastName:last,phone,address:'',points:0,joinDate:new Date().toISOString().split('T')[0],notifications:true,storesVisited:0,rewardsEarned:0,role,activity:[]};
+      await window.__fb.setDoc(window.__fb.docRef('users',cred.user.uid),CU);
+      IS_ADMIN=isAdmin;
+      showLoad(false);initApp();toast('Account created! Welcome 🎉'+(isAdmin?' You have Admin access!':''),'ok');
+    }catch(e){showLoad(false);toast('Registration error: '+e.message,'err');}
+  } else {
+    if(DB.users.find(u=>u.email.toLowerCase()===em)){showLoad(false);toast('Email already registered','err');return;}
+    const newUser={id:'u'+Date.now(),email:em,password:pw,firstName:first,lastName:last,phone,address:'',points:0,joinDate:new Date().toISOString().split('T')[0],notifications:true,storesVisited:0,rewardsEarned:0,role,activity:[]};
+    DB.users.push(newUser);saveDB();CU=newUser;IS_ADMIN=isAdmin;
+    showLoad(false);initApp();toast('Account created! Welcome 🎉'+(isAdmin?' Admin access granted!':''),'ok');
+  }
+}
+
+async function doReset(){
+  const em=document.getElementById('rstEmail').value.trim();
+  if(!em){toast('Enter your email address','err');return;}
+  if(fbMode){
+    try{await window.__fb.sendPasswordResetEmail(em);toast('Reset email sent to '+em,'ok');}
+    catch(e){toast('Error: '+e.message,'err');}
+  } else {
+    const user=DB.users.find(u=>u.email.toLowerCase()===em.toLowerCase());
+    if(!user){toast('No account found','err');return;}
+    toast('Reset link sent (demo mode)','ok');
+  }
+}
+
+async function doLogout(){
+  if(!confirm('Sign out?'))return;
+  if(fbMode){try{await window.__fb.signOut();}catch(e){}}
+  CU=null;IS_ADMIN=false;localStorage.removeItem('oap_cu');
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('topNav').style.display='none';
+  document.getElementById('botNav').style.display='none';
+  document.getElementById('authOverlay').style.display='flex';
+  stopScanner();showAuthPage('login');
+}
+
+// ── APP INIT ──
+function initApp(){
+  document.getElementById('authOverlay').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  document.getElementById('topNav').style.display='flex';
+  document.getElementById('botNav').style.display='flex';
+  updateNav();renderHome();renderStores();renderRewards();renderProfile();
+  populateManualStores();populateQRStores();renderScanHistory();
+  if(IS_ADMIN){
+    document.getElementById('adminNavBadge').classList.remove('hidden');
+    document.getElementById('dropAdminBtn').classList.remove('hidden');
+    document.getElementById('bn-admin').classList.remove('hidden');
+    document.getElementById('userBtn').classList.add('is-admin');
+    const dav=document.getElementById('dropAv');if(dav)dav.classList.add('admin-av');
+    renderAdmin();
+    // Populate admin dropdowns
+    populateAdminDropdowns();
+  }
+  showPage('home');
+  // Populate offer store dropdown
+  populateOfferStoreDropdown();
+}
+
+function updateNav(){
+  if(!CU)return;
+  const init=(CU.firstName[0]+(CU.lastName?CU.lastName[0]:'')).toUpperCase();
+  ['userAv','dropAv'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=init;});
+  setTxt('userNameNav',CU.firstName);
+  setTxt('navPts',CU.points.toLocaleString());
+  setTxt('dropName',CU.firstName+' '+CU.lastName);
+  setTxt('dropEmail',CU.email);
+  updateFbBadge();
+}
+
+// ── PAGE NAV ──
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page'+capitalize(id)).classList.add('active');
+  document.querySelectorAll('.bn-item[id^="bn-"]').forEach(b=>b.classList.remove('active'));
+  const bn=document.getElementById('bn-'+id);if(bn)bn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='profile')renderProfile();
+  if(id==='admin'&&IS_ADMIN){renderAdmin();populateAdminDropdowns();}
+  if(id==='rewards')renderRewards();
+}
+
+// ── HOME ──
+function renderHome(){
+  if(!CU)return;
+  setTxt('hStatStores',DB.stores.filter(s=>s.active).length+'+');
+  setTxt('hStatMembers',DB.users.length+'');
+  setTxt('hStatPts',DB.transactions.reduce((s,t)=>s+t.points,0).toLocaleString());
+  const list=document.getElementById('homeActList');
+  const acts=CU.activity.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+  list.innerHTML=acts.length?acts.map(a=>actHTML(a)).join(''):'<div class="empty-msg"><i class="fas fa-history"></i><p>No activity yet — scan a store to get started!</p></div>';
+}
+
+function actHTML(a){
+  const isEarn=a.type==='earn';
+  const d=new Date(a.date);
+  const dateStr=d.toLocaleDateString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  return`<div class="act-item"><div class="act-ico ${a.type}"><i class="fas ${isEarn?'fa-plus':'fa-minus'}"></i></div><div class="act-content"><div class="act-store">${esc(a.store)}</div><div class="act-date">${dateStr}</div></div><div class="act-pts ${a.type}">${isEarn?'+':''} ${a.points} pts</div></div>`;
+}
+
+// ── STORES ──
+function initCatChips(){
+  const cats=['all','Grocery','Restaurant','Bakery','Cafe','Market','Other'];
+  document.getElementById('catChips').innerHTML=cats.map(c=>`<button class="f-chip${c===catFilter?' active':''}" onclick="setCat('${c}')">${c==='all'?'🏪 All':CAT_ICONS[c]+' '+c}</button>`).join('');
+}
+function setCat(c){catFilter=c;initCatChips();renderStores();}
+function clearStoreFilters(){catFilter='all';document.getElementById('areaFilter').value='all';document.getElementById('storeSort').value='name';initCatChips();renderStores();}
+
+function renderStores(){
+  initCatChips();
+  const area=document.getElementById('areaFilter').value;
+  const sort=document.getElementById('storeSort').value;
+  let list=DB.stores.filter(s=>(catFilter==='all'||s.category===catFilter)&&(area==='all'||s.location===area));
+  if(sort==='name')list.sort((a,b)=>a.name.localeCompare(b.name));else list.sort((a,b)=>b.points-a.points);
+  setTxt('storeShown',list.length);setTxt('storeTotal',DB.stores.length);
+  document.getElementById('storesList').innerHTML=list.length?list.map(storeCard).join(''):'<div class="empty-msg"><i class="fas fa-store"></i><p>No stores match your filters</p></div>';
+}
+
+function storeCard(s){
+  const ico=CAT_ICONS[s.category]||'🏬';
+  return`<div class="store-card"><div class="store-banner">${ico}</div><div class="store-body">
+    <div class="store-hdr"><div class="store-name">${esc(s.name)}</div><span class="store-badge ${s.active?'s-active':'s-inactive'}">${s.active?'Active':'Inactive'}</span></div>
+    <div class="store-meta"><span><i class="fas fa-tag"></i>${esc(s.category)}</span><span><i class="fas fa-map-marker-alt"></i>${esc(s.location)}</span><span><i class="fas fa-qrcode"></i>${s.scans} scans</span></div>
+    <div class="store-desc">${esc(s.description)}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem">
+      <div class="pts-pill"><i class="fas fa-coins"></i>${s.points} pts/scan</div>
+      <button class="btn btn-primary btn-sm" onclick="quickScan('${s.id}')"><i class="fas fa-qrcode"></i> Scan</button>
+    </div>
+  </div></div>`;
+}
+
+// ── REWARDS ──
+function clearRewardFilters(){document.getElementById('rPtsFilter').value='all';document.getElementById('rTypeFilter').value='all';document.getElementById('rSort').value='points-asc';renderRewards();}
+
+function renderRewards(){
+  if(!CU)return;
+  const pf=document.getElementById('rPtsFilter').value;
+  const tf=document.getElementById('rTypeFilter').value;
+  const srt=document.getElementById('rSort').value;
+  let list=DB.rewards.filter(r=>{
+    if(!r.active)return false;if(tf!=='all'&&r.type!==tf)return false;
+    if(pf==='0-100'&&(r.points<0||r.points>100))return false;
+    if(pf==='101-300'&&(r.points<101||r.points>300))return false;
+    if(pf==='301-600'&&(r.points<301||r.points>600))return false;
+    if(pf==='601+'&&r.points<601)return false;
+    return true;
+  });
+  if(srt==='points-asc')list.sort((a,b)=>a.points-b.points);else list.sort((a,b)=>b.points-a.points);
+  setTxt('rwdShown',list.length);setTxt('rwdTotal',DB.rewards.filter(r=>r.active).length);setTxt('rwdUserPts',CU.points.toLocaleString());
+  const typeEmoji={discount:'🏷️',food:'🍽️',giftcard:'🎁',membership:'⭐',service:'🛠️',other:'✨'};
+  document.getElementById('rewardsList').innerHTML=list.length?list.map(r=>{
+    const can=CU.points>=r.points;
+    const expTxt=r.expiry?`<span style="font-size:.65rem;color:var(--txt3)"><i class="fas fa-calendar-alt" style="color:var(--gold)"></i> Expires ${r.expiry}</span>`:'';
+    return`<div class="reward-card${can?'':' locked'}">
+      <div class="r-ico">${typeEmoji[r.type]||'🎁'}</div>
+      <div class="r-body">
+        <div class="r-name">${esc(r.name)}${r.storeId?` <span style="font-size:.65rem;color:var(--teal)">(${esc(DB.stores.find(s=>s.id===r.storeId)?.name||'')})</span>`:''}</div>
+        <div class="r-desc">${esc(r.description)}</div>
+        ${expTxt}
+        <div class="r-foot" style="margin-top:.35rem">
+          <div class="r-pts"><i class="fas fa-coins"></i>${r.points.toLocaleString()} pts</div>
+          <div style="display:flex;gap:.35rem;align-items:center">
+            <span class="r-type">${r.type}</span>
+            <button class="btn btn-primary btn-sm" ${can?'':`disabled style="opacity:.45;cursor:not-allowed"`} onclick="redeemReward('${r.id}')"><i class="fas fa-${can?'check':'lock'}"></i>${can?'Redeem':'Locked'}</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty-msg"><i class="fas fa-gift"></i><p>No rewards match your filters</p></div>';
+}
+
+// ── PROFILE ──
+function renderProfile(){
+  if(!CU)return;
+  setTxt('profName',CU.firstName+' '+CU.lastName);setTxt('profPts',CU.points.toLocaleString());
+  setTxt('profEmail',CU.email);setTxt('profPhone',CU.phone||'—');
+  setTxt('statStores',CU.storesVisited||0);setTxt('statRewards',CU.rewardsEarned||0);
+  setTxt('statSince',CU.joinDate?CU.joinDate.split('-')[0]:'2024');
+  const lvl=getLevel(CU.points);setTxt('statLevel',lvl.label);
+  const pct=Math.min(100,Math.round((CU.points/2000)*100));
+  document.getElementById('progFill').style.width=pct+'%';
+  setTxt('progCurr',CU.points.toLocaleString()+' pts');setTxt('lvlDesc',lvl.desc);
+  const acts=CU.activity.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
+  document.getElementById('profActList').innerHTML=acts.length?acts.map(a=>actHTML(a)).join(''):'<div class="empty-msg"><i class="fas fa-history"></i><p>No activity yet!</p></div>';
+  // Achat list
+  const myAchats=DB.achats.filter(a=>a.userId===CU.id).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById('achatList').innerHTML=myAchats.length?myAchats.map(a=>{
+    const d=new Date(a.date).toLocaleDateString('en-CA',{month:'short',day:'numeric'});
+    return`<div class="achat-item"><div class="achat-ico"><i class="fas fa-shopping-bag"></i></div><div class="achat-body"><div class="achat-desc">${esc(a.storeName)}</div><div class="achat-meta">${d}${a.notes?' · '+esc(a.notes):''}</div></div><div><div class="achat-amount">$${Number(a.amount).toFixed(2)}</div><div style="font-size:.68rem;color:var(--gold);text-align:right">+${a.points} pts</div></div></div>`;
+  }).join(''):'<div class="empty-msg"><i class="fas fa-shopping-bag"></i><p>No purchases recorded yet</p></div>';
+  updateNav();
+}
+
+function loadAllActivity(){
+  const acts=CU.activity.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById('profActList').innerHTML=acts.length?acts.map(a=>actHTML(a)).join(''):'<div class="empty-msg"><i class="fas fa-history"></i><p>No activity yet!</p></div>';
+}
+
+function getLevel(pts){
+  if(pts>=5000)return{label:'Platinum',desc:'🏆 Elite status! You are our top member!'};
+  if(pts>=2000)return{label:'Gold',desc:'⭐ Gold member! Enjoy exclusive rewards!'};
+  if(pts>=500)return{label:'Silver',desc:'🥈 Silver member! '+(2000-pts)+' pts to reach Gold!'};
+  return{label:'Bronze',desc:'🥉 Bronze member! Earn '+(500-pts)+' more pts to reach Silver!'};
+}
+
+async function saveProfile(){
+  if(!CU)return;
+  const first=document.getElementById('epFirst').value.trim();
+  const last=document.getElementById('epLast').value.trim();
+  const em=document.getElementById('epEmail').value.trim();
+  const phone=document.getElementById('epPhone').value.trim();
+  const addr=document.getElementById('epAddr').value.trim();
+  const pw=document.getElementById('epPass').value;
+  if(!first||!em){toast('Name and email are required','err');return;}
+  CU.firstName=first;CU.lastName=last;CU.email=em;CU.phone=phone;CU.address=addr;CU.notifications=document.getElementById('epNotif').checked;
+  if(pw&&pw.length>=8){
+    CU.password=pw;
+    if(fbMode&&window.__fbAuth.currentUser){try{await window.__fb.updatePassword(window.__fbAuth.currentUser,pw);}catch(e){toast('Password update error: '+e.message,'warn');}}
+  } else if(pw&&pw.length<8){toast('Password must be 8+ characters','err');return;}
+  if(fbMode)try{await window.__fb.updateDoc(window.__fb.docRef('users',CU.id),{firstName:first,lastName:last,email:em,phone,address:addr,notifications:CU.notifications});}catch(e){}
+  saveDB();closeModal('editProfileModal');renderProfile();toast('Profile updated!','ok');
+}
+
+function openEditProfile(){
+  if(!CU)return;
+  document.getElementById('epFirst').value=CU.firstName||'';document.getElementById('epLast').value=CU.lastName||'';
+  document.getElementById('epEmail').value=CU.email||'';document.getElementById('epPhone').value=CU.phone||'';
+  document.getElementById('epAddr').value=CU.address||'';document.getElementById('epNotif').checked=CU.notifications!==false;
+  openModal('editProfileModal');
+}
+
+// ── SCAN ──
+function populateManualStores(){
+  const sel=document.getElementById('manualStore');
+  sel.innerHTML='<option value="">— select store —</option>'+DB.stores.filter(s=>s.active).map(s=>`<option value="${s.id}">${esc(s.name)} (+${s.points} pts)</option>`).join('');
+}
+
+function startScanner(){
+  const rd=document.getElementById('qrReader');rd.innerHTML='';
+  setScanStatus('idle','<i class="fas fa-camera"></i> Starting camera…');
+  if(typeof Html5Qrcode==='undefined'){toast('QR library not loaded — use manual selection','warn');return;}
+  html5QrCode=new Html5Qrcode('qrReader');
+  html5QrCode.start({facingMode:'environment'},{fps:10,qrbox:{width:200,height:200}},onScanSuccess,()=>{})
+    .then(()=>{scannerActive=true;document.getElementById('startScanBtn').disabled=true;document.getElementById('stopScanBtn').disabled=false;setScanStatus('idle','<i class="fas fa-qrcode"></i> Ready to scan');})
+    .catch(()=>{setScanStatus('err','<i class="fas fa-times-circle"></i> Camera error — use manual selection');toast('Camera not available','err');});
+}
+
+function stopScanner(){
+  if(html5QrCode&&scannerActive){html5QrCode.stop().catch(()=>{});scannerActive=false;}
+  document.getElementById('startScanBtn').disabled=false;document.getElementById('stopScanBtn').disabled=true;
+}
+function switchCam(){stopScanner();startScanner();}
+
+function onScanSuccess(txt){
+  let storeId=txt;
+  try{const d=JSON.parse(txt);storeId=d.storeId||d.id||txt;}catch(e){}
+  const store=DB.stores.find(s=>s.id===storeId||s.name===txt);
+  if(store&&store.active){processEarn(store);stopScanner();}
+  else setScanStatus('err','<i class="fas fa-times-circle"></i> Invalid QR code');
+}
+
+function confirmManual(){
+  const sel=document.getElementById('manualStore');
+  const store=DB.stores.find(s=>s.id===sel.value);
+  if(!store){toast('Please select a store first','err');return;}
+  if(!store.active){toast('This store is currently inactive','err');return;}
+  processEarn(store);
+}
+
+function quickScan(sid){
+  const store=DB.stores.find(s=>s.id===sid);
+  if(!store||!store.active){toast('Store not available','err');return;}
+  openModal('scanModal');
+  setTimeout(()=>{document.getElementById('manualStore').value=sid;processEarn(store);},400);
+}
+
+async function processEarn(store){
+  if(!CU)return;
+  stopScanner();
+  CU.points+=store.points;
+  const act={id:'a'+Date.now(),type:'earn',store:store.name,points:store.points,date:new Date().toISOString()};
+  CU.activity.unshift(act);
+  CU.storesVisited=Math.max(CU.storesVisited||0,(new Set(CU.activity.filter(a=>a.type==='earn').map(a=>a.store))).size);
+  const tx={id:'t'+Date.now(),userId:CU.id,userName:CU.firstName+' '+CU.lastName,storeId:store.id,storeName:store.name,points:store.points,date:new Date().toISOString()};
+  DB.transactions.unshift(tx);
+  store.scans=(store.scans||0)+1;
+  if(fbMode){
+    try{
+      await window.__fb.updateDoc(window.__fb.docRef('users',CU.id),{points:CU.points,activity:CU.activity,storesVisited:CU.storesVisited});
+      await window.__fb.addDoc(window.__fb.colRef('transactions'),tx);
+    }catch(e){}
+  }
+  saveDB();
+  scansToday++;lastScanTime=new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'});
+  setScanStatus('ok',`<i class="fas fa-check-circle"></i> +${store.points} points earned at ${store.name}!`);
+  showPtsPopup('+'+store.points+' pts at '+store.name+' 🎉');
+  toast(`+${store.points} points from ${store.name}!`,'ok');
+  setTxt('ssToday',scansToday);setTxt('ssLast',lastScanTime);setTxt('ssTotalPts',CU.points.toLocaleString());
+  updateNav();renderHome();renderScanHistory();
+  setTimeout(()=>{closeModal('scanModal');renderProfile();if(IS_ADMIN)renderAdmin();},2200);
+}
+
+function setScanStatus(type,html){
+  const el=document.getElementById('scanStatus');el.className='scan-status '+type;
+  document.getElementById('scanMsg').innerHTML=html;
+}
+
+function renderScanHistory(){
+  if(!CU)return;
+  const acts=CU.activity.filter(a=>a.type==='earn').slice(0,5);
+  document.getElementById('scanHist').innerHTML=acts.map(a=>{
+    const d=new Date(a.date).toLocaleDateString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    return`<div class="hist-item"><i class="fas fa-check-circle"></i>${esc(a.store)} — +${a.points} pts — ${d}</div>`;
+  }).join('')||'<div class="hist-item"><i class="fas fa-info-circle"></i>No scans yet</div>';
+  setTxt('ssTotalPts',CU.points.toLocaleString());
+}
+
+// ── REDEEM ──
+function openRedeemModal(){if(!CU)return;setTxt('redPts',CU.points.toLocaleString());renderRedeemList();openModal('redeemModal');}
+
+function renderRedeemList(){
+  if(!CU)return;setTxt('redPts',CU.points.toLocaleString());
+  const f=document.getElementById('redFilter').value;
+  const typeEmoji={discount:'🏷️',food:'🍽️',giftcard:'🎁',membership:'⭐',service:'🛠️',other:'✨'};
+  let list=DB.rewards.filter(r=>{
+    if(!r.active)return false;if(f==='affordable')return CU.points>=r.points;
+    if(f==='0-100')return r.points<=100;if(f==='101-300')return r.points>=101&&r.points<=300;
+    if(f==='301-600')return r.points>=301&&r.points<=600;return true;
+  }).sort((a,b)=>a.points-b.points);
+  document.getElementById('redeemList').innerHTML=list.length?list.map(r=>{
+    const can=CU.points>=r.points;
+    return`<div class="redeem-item${can?' affordable':''}"><div class="ri-ico">${typeEmoji[r.type]||'🎁'}</div><div class="ri-body"><div class="ri-name">${esc(r.name)}</div><div class="ri-desc">${esc(r.description)}</div><div class="ri-foot"><div class="ri-pts"><i class="fas fa-coins"></i>${r.points.toLocaleString()} pts</div><button class="btn btn-sm ${can?'btn-primary':'btn-ghost'}" ${can?'':`disabled style="opacity:.4;cursor:not-allowed"`} onclick="redeemReward('${r.id}')"><i class="fas fa-${can?'check':'lock'}"></i>${can?'Redeem':'Need '+(r.points-CU.points)+' more'}</button></div></div></div>`;
+  }).join(''):'<div class="empty-msg"><i class="fas fa-gift"></i><p>No rewards available</p></div>';
+}
+
+async function redeemReward(rid){
+  const reward=DB.rewards.find(r=>r.id===rid);if(!reward){toast('Reward not found','err');return;}
+  if(!CU||CU.points<reward.points){toast('Not enough points','err');return;}
+  if(!confirm(`Redeem "${reward.name}" for ${reward.points} points?`))return;
+  CU.points-=reward.points;CU.rewardsEarned=(CU.rewardsEarned||0)+1;
+  CU.activity.unshift({id:'a'+Date.now(),type:'redeem',store:'Ottawa Arab Points',points:-reward.points,date:new Date().toISOString()});
+  if(fbMode)try{await window.__fb.updateDoc(window.__fb.docRef('users',CU.id),{points:CU.points,activity:CU.activity,rewardsEarned:CU.rewardsEarned});}catch(e){}
+  saveDB();closeModal('redeemModal');toast(`✅ "${reward.name}" redeemed!`,'ok');renderProfile();renderHome();renderRewards();updateNav();
+}
+
+// ════════════════════════════════════
+// ADMIN FUNCTIONS
+// ════════════════════════════════════
+
+function populateAdminDropdowns(){
+  // Users dropdown for achat
+  const acUser=document.getElementById('acUser');
+  if(acUser)acUser.innerHTML='<option value="">— select user —</option>'+DB.users.filter(u=>u.role!=='admin').map(u=>`<option value="${u.id}">${esc(u.firstName+' '+u.lastName)} (${esc(u.email)})</option>`).join('');
+  // Stores dropdown for achat
+  const acStore=document.getElementById('acStore');
+  if(acStore)acStore.innerHTML='<option value="">— select store —</option>'+DB.stores.filter(s=>s.active).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  // Offer store dropdown
+  populateOfferStoreDropdown();
+}
+
+function populateOfferStoreDropdown(){
+  const rfStore=document.getElementById('rfStore');
+  if(rfStore)rfStore.innerHTML='<option value="">All Stores</option>'+DB.stores.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+}
+
+async function renderAdmin(){
+  if(!IS_ADMIN)return;
+  // Stats
+  const todayStr=new Date().toISOString().split('T')[0];
+  const todayScans=DB.transactions.filter(t=>t.date.startsWith(todayStr)).length;
+  const totalPts=DB.transactions.reduce((s,t)=>s+t.points,0);
+  setTxt('aUsers',DB.users.length);
+  setTxt('aTotalScans',DB.transactions.length);setTxt('aPtsGiven',totalPts.toLocaleString());setTxt('aTodayScans',todayScans);
+  setTxt('siUsers',DB.users.length);setTxt('siStores',DB.stores.length);setTxt('siRewards',DB.rewards.length);
+  setTxt('siTx',DB.transactions.length);setTxt('siAchats',DB.achats.length);setTxt('siTime',new Date().toLocaleString());
+  // User mgmt
+  renderUserMgmtList();
+  // Store mgmt
+  document.getElementById('storeMgmtList').innerHTML=DB.stores.map(s=>`<div class="mgmt-item">
+    <span style="font-size:1.1rem">${CAT_ICONS[s.category]||'🏬'}</span>
+    <div class="mgmt-info"><div class="mgmt-name">${esc(s.name)}</div><div class="mgmt-sub">${s.location} · ${s.points} pts · ${s.scans} scans · <span style="color:${s.active?'var(--green)':'var(--red)'}">${s.active?'Active':'Inactive'}</span></div></div>
+    <div class="mgmt-acts"><button class="btn btn-ghost btn-sm" onclick="editStore('${s.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="deleteStore('${s.id}')"><i class="fas fa-trash"></i></button></div>
+  </div>`).join('');
+  // Reward mgmt
+  document.getElementById('rewardMgmtList').innerHTML=DB.rewards.map(r=>{
+    const storeName=r.storeId?DB.stores.find(s=>s.id===r.storeId)?.name:'';
+    return`<div class="mgmt-item">
+      <div class="mgmt-info"><div class="mgmt-name">${esc(r.name)}${storeName?` <span style="font-size:.65rem;color:var(--teal)">(${esc(storeName)})</span>`:''}</div>
+      <div class="mgmt-sub">${r.points} pts · ${r.type}${r.expiry?' · Expires '+r.expiry:''} · <span style="color:${r.active?'var(--green)':'var(--red)'}">${r.active?'Active':'Inactive'}</span></div></div>
+      <div class="mgmt-acts"><button class="btn btn-ghost btn-sm" onclick="editReward('${r.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="deleteReward('${r.id}')"><i class="fas fa-trash"></i></button></div>
+    </div>`;
+  }).join('');
+  // Achat table
+  renderAchatTable();
+  // Transactions table
+  document.getElementById('scansTbody').innerHTML=DB.transactions.slice(0,15).map(t=>{
+    const d=new Date(t.date);
+    return`<tr><td>${d.toLocaleDateString('en-CA')}</td><td>${d.toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'})}</td><td>${esc(t.userName)}</td><td>${esc(t.storeName)}</td><td style="color:var(--gold);font-weight:700">+${t.points}</td></tr>`;
+  }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--txt3);padding:1rem">No transactions yet</td></tr>';
+  updateFbBadge();
+}
+
+function renderUserMgmtList(){
+  const el=document.getElementById('userMgmtList');
+  if(!el)return;
+  el.innerHTML=DB.users.map(u=>{
+    const init=(u.firstName[0]+(u.lastName?u.lastName[0]:'')).toUpperCase();
+    const isAdminUser=u.role==='admin'||checkAdmin(u.email);
+    return`<div class="mgmt-item">
+      <div class="user-avatar-sm ${isAdminUser?'admin-user':''}">${init}</div>
+      <div class="mgmt-info">
+        <div class="mgmt-name" style="display:flex;align-items:center;gap:.4rem">${esc(u.firstName+' '+u.lastName)} <span class="role-badge ${isAdminUser?'role-admin':'role-user'}">${isAdminUser?'Admin':'User'}</span></div>
+        <div class="mgmt-sub" style="display:flex;align-items:center;gap:.55rem;flex-wrap:wrap">
+          <span>${esc(u.email)}</span>
+          <span class="user-pts-badge"><i class="fas fa-coins"></i> ${(u.points||0).toLocaleString()} pts</span>
+          ${u.phone?`<span><i class="fas fa-phone" style="color:var(--gold)"></i> ${esc(u.phone)}</span>`:''}
+        </div>
+      </div>
+      <div class="mgmt-acts">
+        <button class="btn btn-ghost btn-sm" onclick="editUserModal('${u.id}')"><i class="fas fa-edit"></i></button>
+        ${!isAdminUser?`<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>`:''}
+      </div>
+    </div>`;
+  }).join('')||'<div class="empty-msg"><i class="fas fa-users"></i><p>No users found</p></div>';
+}
+
+// ── ADD USER (Admin) ──
+async function adminAddUser(){
+  const first=document.getElementById('auFirst').value.trim();
+  const last=document.getElementById('auLast').value.trim();
+  const em=document.getElementById('auEmail').value.trim().toLowerCase();
+  const pw=document.getElementById('auPass').value;
+  const phone=document.getElementById('auPhone').value.trim();
+  const pts=parseInt(document.getElementById('auPts').value)||0;
+  const role=document.getElementById('auRole').value;
+  if(!first||!last||!em||!pw){toast('Please fill all required fields','err');return;}
+  if(pw.length<8){toast('Password must be 8+ characters','err');return;}
+  showLoad(true);
+  if(fbMode){
+    try{
+      const cred=await window.__fb.createUserWithEmailAndPassword(em,pw);
+      const newUser={id:cred.user.uid,email:em,firstName:first,lastName:last,phone,address:'',points:pts,joinDate:new Date().toISOString().split('T')[0],notifications:true,storesVisited:0,rewardsEarned:0,role,activity:[]};
+      await window.__fb.setDoc(window.__fb.docRef('users',cred.user.uid),newUser);
+      DB.users.push(newUser);saveDB();
+      showLoad(false);toggleForm('addUserForm');renderAdmin();populateAdminDropdowns();toast('User created: '+em,'ok');
+    }catch(e){showLoad(false);toast('Error creating user: '+e.message,'err');}
+  } else {
+    if(DB.users.find(u=>u.email.toLowerCase()===em)){showLoad(false);toast('Email already registered','err');return;}
+    const newUser={id:'u'+Date.now(),email:em,password:pw,firstName:first,lastName:last,phone,address:'',points:pts,joinDate:new Date().toISOString().split('T')[0],notifications:true,storesVisited:0,rewardsEarned:0,role,activity:[]};
+    DB.users.push(newUser);saveDB();showLoad(false);toggleForm('addUserForm');renderAdmin();populateAdminDropdowns();toast('User created!','ok');
+    // Reset form
+    ['auFirst','auLast','auEmail','auPass','auPhone'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('auPts').value='0';document.getElementById('auRole').value='user';
+  }
+}
+
+function editUserModal(uid){
+  const u=DB.users.find(x=>x.id===uid);if(!u)return;
+  document.getElementById('euId').value=u.id;
+  document.getElementById('euFirst').value=u.firstName||'';
+  document.getElementById('euLast').value=u.lastName||'';
+  document.getElementById('euEmail').value=u.email||'';
+  document.getElementById('euPhone').value=u.phone||'';
+  document.getElementById('euPts').value=u.points||0;
+  document.getElementById('euRole').value=u.role||'user';
+  document.getElementById('editUserForm').classList.add('open');
+  document.getElementById('editUserForm').style.display='block';
+  document.getElementById('editUserForm').scrollIntoView({behavior:'smooth'});
+}
+
+function closeEditUser(){
+  const el=document.getElementById('editUserForm');
+  el.classList.remove('open');el.style.display='none';
+}
+
+async function adminSaveUser(){
+  const id=document.getElementById('euId').value;
+  const u=DB.users.find(x=>x.id===id);if(!u)return;
+  u.firstName=document.getElementById('euFirst').value.trim();
+  u.lastName=document.getElementById('euLast').value.trim();
+  u.email=document.getElementById('euEmail').value.trim();
+  u.phone=document.getElementById('euPhone').value.trim();
+  u.points=parseInt(document.getElementById('euPts').value)||0;
+  u.role=document.getElementById('euRole').value;
+  if(fbMode)try{await window.__fb.updateDoc(window.__fb.docRef('users',id),{firstName:u.firstName,lastName:u.lastName,email:u.email,phone:u.phone,points:u.points,role:u.role});}catch(e){}
+  saveDB();closeEditUser();renderAdmin();toast('User updated!','ok');
+}
+
+async function deleteUser(uid){
+  const u=DB.users.find(x=>x.id===uid);if(!u)return;
+  if(u.id===CU.id){toast("You can't delete yourself",'err');return;}
+  if(!confirm(`Delete user "${u.firstName} ${u.lastName}"? This is irreversible.`))return;
+  DB.users=DB.users.filter(x=>x.id!==uid);
+  if(fbMode)try{await window.__fb.deleteDoc(window.__fb.docRef('users',uid));}catch(e){}
+  saveDB();renderAdmin();populateAdminDropdowns();toast('User deleted','warn');
+}
+
+// ── STORE CRUD ──
+function saveStore(){
+  const id=document.getElementById('sfId').value;
+  const name=document.getElementById('sfName').value.trim();
+  const cat=document.getElementById('sfCat').value;
+  const loc=document.getElementById('sfLoc').value.trim();
+  const pts=parseInt(document.getElementById('sfPts').value)||50;
+  const desc=document.getElementById('sfDesc').value.trim();
+  const active=document.getElementById('sfActive').checked;
+  if(!name||!loc){toast('Name and location required','err');return;}
+  if(id){const s=DB.stores.find(x=>x.id===id);if(s)Object.assign(s,{name,category:cat,location:loc,points:pts,description:desc,active});}
+  else DB.stores.push({id:'s'+Date.now(),name,category:cat,location:loc,points:pts,description:desc,active,scans:0});
+  saveDB();toggleForm('storeForm');resetStoreForm();renderAdmin();renderStores();populateManualStores();populateQRStores();populateAdminDropdowns();toast(id?'Store updated!':'Store added!','ok');
+}
+
+function editStore(sid){
+  const s=DB.stores.find(x=>x.id===sid);if(!s)return;
+  document.getElementById('sfId').value=s.id;document.getElementById('sfName').value=s.name;
+  document.getElementById('sfCat').value=s.category;document.getElementById('sfLoc').value=s.location;
+  document.getElementById('sfPts').value=s.points;document.getElementById('sfDesc').value=s.description||'';
+  document.getElementById('sfActive').checked=s.active;
+  const fb=document.getElementById('storeForm');fb.classList.add('open');fb.scrollIntoView({behavior:'smooth'});
+}
+
+function deleteStore(sid){
+  if(!confirm('Delete this store?'))return;
+  DB.stores=DB.stores.filter(s=>s.id!==sid);
+  saveDB();renderAdmin();renderStores();populateManualStores();populateQRStores();toast('Store deleted','warn');
+}
+
+function resetStoreForm(){['sfId','sfName','sfLoc','sfDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('sfPts').value='50';document.getElementById('sfActive').checked=true;}
+
+// ── OFFER/REWARD CRUD ──
+function saveReward(){
+  const id=document.getElementById('rfId').value;
+  const name=document.getElementById('rfName').value.trim();
+  const type=document.getElementById('rfType').value;
+  const pts=parseInt(document.getElementById('rfPts').value)||100;
+  const desc=document.getElementById('rfDesc').value.trim();
+  const active=document.getElementById('rfActive').checked;
+  const storeId=document.getElementById('rfStore').value||'';
+  const expiry=document.getElementById('rfExpiry').value||'';
+  if(!name||!desc){toast('Name and description are required','err');return;}
+  if(id){const r=DB.rewards.find(x=>x.id===id);if(r)Object.assign(r,{name,type,points:pts,description:desc,active,storeId,expiry});}
+  else DB.rewards.push({id:'r'+Date.now(),name,type,points:pts,description:desc,active,storeId,expiry});
+  saveDB();toggleForm('rewardForm');resetRewardForm();renderAdmin();renderRewards();toast(id?'Offer updated!':'Offer added!','ok');
+}
+
+function editReward(rid){
+  const r=DB.rewards.find(x=>x.id===rid);if(!r)return;
+  document.getElementById('rfId').value=r.id;document.getElementById('rfName').value=r.name;
+  document.getElementById('rfType').value=r.type;document.getElementById('rfPts').value=r.points;
+  document.getElementById('rfDesc').value=r.description;document.getElementById('rfActive').checked=r.active;
+  document.getElementById('rfStore').value=r.storeId||'';document.getElementById('rfExpiry').value=r.expiry||'';
+  const fb=document.getElementById('rewardForm');fb.classList.add('open');fb.scrollIntoView({behavior:'smooth'});
+}
+
+function deleteReward(rid){
+  if(!confirm('Delete this offer?'))return;
+  DB.rewards=DB.rewards.filter(r=>r.id!==rid);
+  saveDB();renderAdmin();renderRewards();toast('Offer deleted','warn');
+}
+
+function resetRewardForm(){['rfId','rfName','rfDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('rfPts').value='100';document.getElementById('rfActive').checked=true;document.getElementById('rfStore').value='';document.getElementById('rfExpiry').value='';}
+
+// ── ACHAT / PURCHASE ──
+function toggleAchat(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+  if(el.classList.contains('open'))el.scrollIntoView({behavior:'smooth'});
+}
+
+async function saveAchat(){
+  const userId=document.getElementById('acUser').value;
+  const storeId=document.getElementById('acStore').value;
+  const amount=parseFloat(document.getElementById('acAmount').value)||0;
+  const notes=document.getElementById('acNotes').value.trim();
+  const ptsOverride=document.getElementById('acPtsOverride').value;
+  if(!userId||!storeId||!amount){toast('User, store and amount are required','err');return;}
+  const user=DB.users.find(u=>u.id===userId);
+  const store=DB.stores.find(s=>s.id===storeId);
+  if(!user||!store){toast('Invalid user or store','err');return;}
+  const pts=ptsOverride?parseInt(ptsOverride):store.points;
+  const achat={id:'ac'+Date.now(),userId,userName:user.firstName+' '+user.lastName,storeId,storeName:store.name,amount,points:pts,notes,date:new Date().toISOString()};
+  DB.achats.push(achat);
+  // Add points to user
+  user.points=(user.points||0)+pts;
+  user.activity=user.activity||[];
+  user.activity.unshift({id:'a'+Date.now(),type:'earn',store:store.name+' (Purchase)',points:pts,date:new Date().toISOString()});
+  // Log transaction
+  DB.transactions.unshift({id:'t'+Date.now(),userId,userName:achat.userName,storeId,storeName:store.name,points:pts,date:achat.date});
+  store.scans=(store.scans||0)+1;
+  if(fbMode){
+    try{
+      await window.__fb.updateDoc(window.__fb.docRef('users',userId),{points:user.points,activity:user.activity});
+      await window.__fb.addDoc(window.__fb.colRef('achats'),achat);
+    }catch(e){}
+  }
+  saveDB();
+  // If this is CU, refresh
+  if(CU&&CU.id===userId){CU.points=user.points;CU.activity=user.activity;updateNav();}
+  toggleAchat('achatForm');renderAdmin();renderAchatTable();
+  toast(`Purchase recorded! +${pts} pts awarded to ${user.firstName}`,'ok');
+  showPtsPopup(`+${pts} pts → ${user.firstName}`);
+  // Reset form
+  ['acUser','acStore','acAmount','acPtsOverride','acNotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+function renderAchatTable(){
+  const tbody=document.getElementById('achatTbody');
+  if(!tbody)return;
+  tbody.innerHTML=DB.achats.slice().reverse().slice(0,20).map(a=>{
+    const d=new Date(a.date).toLocaleDateString('en-CA',{month:'short',day:'numeric'});
+    return`<tr><td>${d}</td><td>${esc(a.userName)}</td><td>${esc(a.storeName)}</td><td style="color:var(--teal)">$${Number(a.amount).toFixed(2)}</td><td style="color:var(--gold);font-weight:700">+${a.points}</td><td><button class="btn btn-danger btn-sm" onclick="deleteAchat('${a.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+  }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--txt3);padding:1rem">No purchases yet</td></tr>';
+}
+
+function deleteAchat(aid){
+  if(!confirm('Delete this purchase record?'))return;
+  DB.achats=DB.achats.filter(a=>a.id!==aid);
+  saveDB();renderAdmin();toast('Purchase deleted','warn');
+}
+
+function refreshAdmin(){renderAdmin();populateAdminDropdowns();toast('Admin data refreshed','info');}
+
+// ── QR GENERATOR ──
+function populateQRStores(){
+  const sel=document.getElementById('qrStoreSelect');
+  if(!sel)return;
+  sel.innerHTML='<option value="">— select a store —</option>'+DB.stores.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+}
+
+function onQRStoreChange(){
+  const sid=document.getElementById('qrStoreSelect').value;
+  const has=!!sid;
+  document.getElementById('genQRBtn').disabled=!has;
+  if(!has){document.getElementById('qrZone').innerHTML='<div class="qr-placeholder"><i class="fas fa-qrcode"></i><p>Select a store above</p></div>';document.getElementById('qrInfo').style.display='none';}
+}
+
+function generateQR(){
+  const sid=document.getElementById('qrStoreSelect').value;
+  const store=DB.stores.find(s=>s.id===sid);if(!store){toast('Select a store first','err');return;}
+  const zone=document.getElementById('qrZone');zone.innerHTML='<canvas id="qrCanvas"></canvas>';
+  const data=JSON.stringify({storeId:store.id,storeName:store.name,points:store.points,version:'3.0'});
+  if(typeof QRCode!=='undefined'){
+    QRCode.toCanvas(document.getElementById('qrCanvas'),data,{width:200,margin:2,color:{dark:'#0a0e1a',light:'#ffffff'}},err=>{
+      if(err){zone.innerHTML='<div class="qr-placeholder"><i class="fas fa-exclamation-triangle"></i><p>QR error</p></div>';return;}
+      document.getElementById('dlQRBtn').disabled=false;document.getElementById('printQRBtn').disabled=false;
+    });
+  } else {
+    zone.innerHTML='<div class="qr-placeholder"><i class="fas fa-qrcode"></i><p>'+store.name+' · '+store.points+' pts</p></div>';
+  }
+  setTxt('qrSid',store.id);setTxt('qrSname',store.name);setTxt('qrSpts',store.points+' pts');setTxt('qrSgen',new Date().toLocaleString());
+  document.getElementById('qrInfo').style.display='block';toast('QR generated for '+store.name,'ok');
+}
+
+function downloadQR(){
+  const canvas=document.getElementById('qrCanvas');if(!canvas){toast('Generate QR first','err');return;}
+  const link=document.createElement('a');link.download='qr-code.png';link.href=canvas.toDataURL();link.click();toast('QR downloaded','ok');
+}
+
+function printQR(){
+  const canvas=document.getElementById('qrCanvas');if(!canvas){toast('Generate QR first','err');return;}
+  const store=DB.stores.find(s=>s.id===document.getElementById('qrStoreSelect').value);
+  const win=window.open('','_blank');
+  win.document.write(`<html><body style="text-align:center;font-family:sans-serif;padding:2rem"><h2>${store?store.name:'Store QR Code'}</h2><img src="${canvas.toDataURL()}" style="width:250px"><p>Scan to earn ${store?store.points:''} points!</p></body></html>`);
+  win.document.close();win.print();
+}
+
+function updateDefPts(){const v=parseInt(document.getElementById('defPts').value)||50;DB.config.defPts=v;saveDB();toast('Default points updated to '+v,'ok');}
+
+function exportCSV(){
+  const rows=[['Date','Time','Customer','Store','Points'],...DB.transactions.map(t=>{const d=new Date(t.date);return[d.toLocaleDateString(),d.toLocaleTimeString(),t.userName,t.storeName,t.points];})];
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='scan-history.csv';a.click();toast('CSV exported','ok');
+}
+
+function exportAll(){
+  const data=JSON.stringify(DB,null,2);
+  const blob=new Blob([data],{type:'application/json'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='oap-data.json';a.click();toast('Full data exported','ok');
+}
+
+function resetData(){if(!confirm('Reset all data to demo defaults?'))return;localStorage.removeItem('oap_db3');location.reload();}
+
+// ── SHARE ──
+function openShareModal(){
+  if(!CU)return;
+  setTxt('prevName',CU.firstName+' '+CU.lastName);setTxt('prevPts',CU.points.toLocaleString());
+  setTxt('prevStores',CU.storesVisited||0);setTxt('prevRwds',CU.rewardsEarned||0);setTxt('prevLvl',getLevel(CU.points).label);
+  openModal('shareModal');
+}
+
+function socialShare(net){
+  const msg=`I have ${CU.points} points on Ottawa Arab Points! 🏆 Join me and earn rewards at Arab stores in Ottawa.`;
+  const urls={twitter:`https://twitter.com/intent/tweet?text=${encodeURIComponent(msg)}`,facebook:`https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}`,whatsapp:`https://wa.me/?text=${encodeURIComponent(msg+' '+location.href)}`};
+  if(urls[net])window.open(urls[net],'_blank');
+}
+function copyLink(){navigator.clipboard.writeText(location.href).then(()=>toast('Link copied!','ok')).catch(()=>toast('Copy failed','err'));}
+
+// ── MODALS ──
+function openModal(id){
+  const el=document.getElementById(id);if(!el)return;
+  el.classList.add('open');document.body.style.overflow='hidden';
+  if(id==='redeemModal')openRedeemModal();
+  if(id==='editProfileModal')openEditProfile();
+  if(id==='shareModal')openShareModal();
+}
+function closeModal(id){
+  const el=document.getElementById(id);if(!el)return;
+  el.classList.remove('open');document.body.style.overflow='';
+  if(id==='scanModal')stopScanner();
+}
+document.querySelectorAll('.modal-ov').forEach(ov=>{ov.addEventListener('click',e=>{if(e.target===ov)closeModal(ov.id);});});
+
+// ── DROPDOWN ──
+function toggleDrop(){document.getElementById('userDrop').classList.toggle('open');}
+function closeDrop(){document.getElementById('userDrop').classList.remove('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('#userBtn'))closeDrop();});
+
+// ── FORM TOGGLES ──
+function toggleForm(id){
+  const el=document.getElementById(id);
+  if(el.classList.contains('open')){el.classList.remove('open');}
+  else{el.classList.add('open');el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+}
+
+// ── TOAST ──
+function toast(msg,type,dur=3200){
+  const wrap=document.getElementById('toastWrap');
+  const icons={ok:'fa-check-circle',err:'fa-times-circle',info:'fa-coins',warn:'fa-exclamation-triangle'};
+  const t=document.createElement('div');t.className='toast '+(type||'info');
+  t.innerHTML=`<i class="fas ${icons[type]||'fa-info-circle'}"></i><span>${msg}</span>`;
+  wrap.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .35s';setTimeout(()=>t.remove(),400);},dur);
+}
+function showPtsPopup(msg){
+  const ex=document.querySelector('.pts-pop');if(ex)ex.remove();
+  const p=document.createElement('div');p.className='pts-pop';p.textContent=msg;
+  document.body.appendChild(p);setTimeout(()=>p.remove(),2800);
+}
+function showLoad(v){document.getElementById('loadOv').classList.toggle('show',v);}
+
+// ── UTILS ──
+function setTxt(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+window.addEventListener('scroll',()=>{const n=document.getElementById('topNav');if(n)n.classList.toggle('scrolled',window.scrollY>8);},{passive:true});
+
+// Load QR scanner library
+const qrScript=document.createElement('script');

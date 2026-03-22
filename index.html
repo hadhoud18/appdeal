@@ -158,9 +158,27 @@
         body[dir="rtl"] .close-modal{right:auto;left:20px;}
 
         /* ADMIN PANEL */
-        .admin-tab-bar{display:flex;gap:8px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px;}
-        .admin-tab{background:#f0f0f0;border:none;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--mid);}
-        .admin-tab.active{background:linear-gradient(135deg,var(--admin2),var(--admin));color:white;}
+        .admin-tab-bar{
+            display:flex;gap:6px;margin-bottom:20px;
+            overflow-x:auto;padding-bottom:6px;
+            -webkit-overflow-scrolling:touch;
+            scrollbar-width:none;
+        }
+        .admin-tab-bar::-webkit-scrollbar{display:none;}
+        .admin-tab{
+            background:#f0f0f0;border:none;
+            padding:10px 16px;border-radius:20px;
+            font-size:13px;font-weight:600;cursor:pointer;
+            white-space:nowrap;color:var(--mid);
+            flex-shrink:0;min-height:44px;
+            transition:all .2s;
+        }
+        .admin-tab:hover{background:#e2e8f0;color:var(--dark);}
+        .admin-tab.active{
+            background:linear-gradient(135deg,var(--admin2),var(--admin));
+            color:white;
+            box-shadow:0 4px 12px rgba(108,92,231,.3);
+        }
         .admin-section{display:none;}
         .admin-section.active{display:block;}
         .admin-card{background:white;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid #f0f0f0;}
@@ -171,15 +189,26 @@
         .btn-danger-sm{background:#fee2e2;color:#dc2626;border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;}
         .btn-success-sm{background:#dcfce7;color:#16a34a;border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;}
         .admin-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
-        .admin-stat{background:linear-gradient(135deg,#f8f9fa,#e9ecef);border-radius:14px;padding:14px;text-align:center;}
-        .admin-stat-val{font-size:24px;font-weight:700;color:var(--admin);}
-        .admin-stat-lbl{font-size:12px;color:var(--mid);margin-top:4px;}
+        .admin-stat{
+            background:linear-gradient(135deg,#f8f9fa,#e9ecef);
+            border-radius:14px;padding:14px;text-align:center;
+            border:1px solid rgba(108,92,231,.15);
+        }
+        .admin-stat-val{font-size:26px;font-weight:800;color:var(--admin);}
+        .admin-stat-lbl{font-size:11px;color:var(--mid);margin-top:4px;font-weight:500;}
         .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
         .form-group{margin-bottom:14px;}
         .form-label{display:block;margin-bottom:5px;font-weight:600;font-size:13px;color:var(--dark);}
         .form-control{width:100%;padding:.75rem 1rem;border:2px solid #e2e8f0;border-radius:12px;font-size:14px;outline:none;font-family:'Poppins',sans-serif;}
         .form-control:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(9,132,227,.1);}
-        select.form-control{cursor:pointer;}
+        select.form-control{
+            cursor:pointer;
+            appearance:auto;
+            -webkit-appearance:auto;
+            -moz-appearance:auto;
+            background-image:none;
+            padding-right:1rem;
+        }
         textarea.form-control{resize:vertical;min-height:80px;}
         .user-row,.store-row{display:flex;justify-content:space-between;align-items:center;padding:12px;background:#f8f9fa;border-radius:12px;margin-bottom:8px;}
         .user-row-info,.store-row-info{flex:1;}
@@ -187,14 +216,50 @@
         .user-row-email,.store-row-email{font-size:12px;color:var(--mid);}
         .user-row-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;}
         .badge-premium{background:var(--gold);color:#2d3436;}
+        .badge-trial{background:linear-gradient(135deg,#fd79a8,#e84393);color:white;}
         .badge-free{background:#e2e8f0;color:var(--mid);}
         .badge-store{background:linear-gradient(135deg,var(--store),var(--store2));color:white;}
 
         /* ============================================================
            CHAT — SHARED STYLES
            ============================================================ */
-        .chat-container{display:flex;flex-direction:column;height:100%;}
-        .chat-list{flex:1;overflow-y:auto;padding:4px 0;}
+        /* The modal-content already fills 100% height/width.
+           chat-container sits inside it and must also fill fully. */
+        #chatModal .modal-content{
+            padding:0 !important;
+            display:flex;
+            flex-direction:column;
+            overflow:hidden;  /* prevent double scrollbars */
+        }
+        .chat-container{
+            display:flex;
+            flex-direction:column;
+            flex:1;
+            height:100%;
+            min-height:0;  /* critical for nested flex scroll */
+        }
+        /* Thread list view fills the container */
+        #chatView{
+            display:flex;
+            flex-direction:column;
+            flex:1;
+            min-height:0;
+            overflow:hidden;
+        }
+        .chat-list{
+            flex:1;
+            overflow-y:auto;
+            padding:4px 0;
+            min-height:0;
+        }
+        /* Messages view also fills the container */
+        #chatMessagesView{
+            display:flex;
+            flex-direction:column;
+            flex:1;
+            min-height:0;
+            overflow:hidden;
+        }
 
         /* Channel selector tabs (user/store sees these) */
         .chat-channel-tabs{display:flex;gap:8px;margin:12px 0;}
@@ -219,7 +284,7 @@
         .chat-unread{background:var(--red);color:white;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 
         /* Messages area */
-        .chat-messages-area{flex:1;overflow-y:auto;padding:12px 4px;display:flex;flex-direction:column;gap:8px;}
+        .chat-messages-area{flex:1;overflow-y:auto;padding:12px 4px;display:flex;flex-direction:column;gap:8px;min-height:0;}
         .chat-msg{max-width:78%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.4;word-wrap:break-word;}
         .chat-msg.incoming{background:var(--chat-in);color:var(--dark);align-self:flex-start;border-bottom-left-radius:4px;}
         .chat-msg.outgoing{background:var(--chat-out);color:white;align-self:flex-end;border-bottom-right-radius:4px;}
@@ -268,28 +333,54 @@
         }
         .admin-home-card-header{
             background:linear-gradient(135deg,var(--admin2),var(--admin));
-            padding:14px 18px;display:flex;align-items:center;gap:12px;
+            padding:12px 14px;display:flex;align-items:center;gap:10px;
+            flex-wrap:wrap;
         }
-        .admin-home-card-header i{font-size:1.4rem;}
-        .admin-home-card-header h3{margin:0;font-size:16px;font-weight:700;}
+        .admin-home-card-header i{font-size:1.3rem;flex-shrink:0;}
+        .admin-home-card-header h3{margin:0;font-size:15px;font-weight:700;}
         .admin-home-card-header small{font-size:11px;opacity:.85;}
-        .admin-home-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.08);}
+        /* 3-column grid with proper spacing */
+        .admin-home-btns{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:0;
+            background:rgba(255,255,255,.06);
+        }
         .admin-home-btn{
-            background:#1e272e;border:none;color:white;
-            padding:14px 6px;cursor:pointer;
-            display:flex;flex-direction:column;align-items:center;gap:6px;
-            font-size:11px;font-weight:600;transition:background .2s;
+            background:#1e272e;
+            border:none;
+            border-right:1px solid rgba(255,255,255,.07);
+            border-bottom:1px solid rgba(255,255,255,.07);
+            color:white;
+            padding:16px 4px 12px;
+            cursor:pointer;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:6px;
+            font-size:11px;
+            font-weight:600;
+            transition:background .2s;
+            min-height:80px;   /* guaranteed height so count doesn't overflow */
+            overflow:visible;
+            position:relative;
         }
         .admin-home-btn:hover{background:#2d3436;}
-        .admin-home-btn i{font-size:1.3rem;}
+        .admin-home-btn:active{background:rgba(108,92,231,.3);}
+        .admin-home-btn i{font-size:1.3rem;line-height:1;}
+        .admin-home-btn span.btn-label{font-size:11px;font-weight:600;line-height:1;text-align:center;}
         .admin-home-btn .btn-count{
             background:var(--admin);color:white;
-            border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;
+            border-radius:10px;padding:2px 8px;
+            font-size:10px;font-weight:700;
+            line-height:1.4;
+            min-width:20px;text-align:center;
         }
-        .admin-home-btn.btn-users i{color:#74b9ff;}
-        .admin-home-btn.btn-stores i{color:var(--store);}
-        .admin-home-btn.btn-deals i{color:var(--gold);}
-        .admin-home-btn.btn-chat i{color:var(--green);}
+        .admin-home-btn.btn-users   i{color:#74b9ff;}
+        .admin-home-btn.btn-stores  i{color:var(--store);}
+        .admin-home-btn.btn-deals   i{color:var(--gold);}
+        .admin-home-btn.btn-chat    i{color:var(--green);}
         .admin-home-btn.btn-reviews i{color:#fd79a8;}
         .admin-home-btn.btn-settings i{color:var(--admin2);}
         .store-portal-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(243,156,18,.3);}
@@ -349,6 +440,259 @@
         /* ALERT */
         .alert-toast{position:fixed;top:max(60px,calc(60px + var(--safe-t)));left:50%;transform:translateX(-50%);background:var(--dark);color:white;padding:12px 20px;border-radius:10px;font-weight:500;z-index:9998;box-shadow:0 4px 15px rgba(0,0,0,.2);animation:toastAnim 3s ease forwards;max-width:90%;text-align:center;}
         @keyframes toastAnim{0%{opacity:0;top:40px;}15%{opacity:1;top:max(60px,calc(60px + var(--safe-t)));}85%{opacity:1;}100%{opacity:0;}}
+
+        /* ============================================================
+           FLOATING CHAT WIDGET
+           ============================================================ */
+
+        /* Floating button — bottom right, above bottom nav */
+        .float-chat-btn {
+            position: fixed;
+            bottom: calc(80px + max(12px, var(--safe-b)));
+            right: 16px;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0984e3, #6c5ce7);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 6px 24px rgba(9,132,227,.45);
+            z-index: 999;
+            transition: transform .3s, box-shadow .3s;
+            animation: chatPop .6s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        .float-chat-btn:hover  { transform: scale(1.1); box-shadow: 0 10px 30px rgba(9,132,227,.55); }
+        .float-chat-btn:active { transform: scale(.95); }
+        @keyframes chatPop {
+            from { transform: scale(0); opacity: 0; }
+            to   { transform: scale(1); opacity: 1; }
+        }
+
+        /* Pulse ring around button when there are unread messages */
+        .float-chat-btn.has-unread::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 3px solid rgba(9,132,227,.5);
+            animation: chatPulse 1.8s ease-out infinite;
+        }
+        @keyframes chatPulse {
+            0%   { transform: scale(1);   opacity: 1; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        /* Unread count badge on the floating button */
+        .float-chat-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #d63031;
+            color: white;
+            border-radius: 50%;
+            min-width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid white;
+            animation: badgeBounce .4s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        @keyframes badgeBounce {
+            from { transform: scale(0); }
+            to   { transform: scale(1); }
+        }
+
+        /* Tooltip label next to floating button */
+        .float-chat-tooltip {
+            position: absolute;
+            right: 68px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,.2);
+        }
+        .float-chat-tooltip::after {
+            content: '';
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 6px solid transparent;
+            border-left-color: var(--dark);
+        }
+        .float-chat-btn:hover .float-chat-tooltip { opacity: 1; }
+
+        /* ── CHAT WINDOW (slide-up panel, not full-screen modal) ── */
+        .chat-window {
+            position: fixed;
+            bottom: calc(150px + max(0px, var(--safe-b)));
+            right: 12px;
+            width: calc(100% - 24px);
+            max-width: 360px;
+            height: 520px;
+            max-height: calc(100vh - 200px);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 998;
+            transform: translateY(20px) scale(.97);
+            opacity: 0;
+            pointer-events: none;
+            transition: all .3s cubic-bezier(.34,1.3,.64,1);
+        }
+        .chat-window.open {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Chat window header */
+        .cw-header {
+            background: linear-gradient(135deg, #0984e3, #6c5ce7);
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .cw-avatar {
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,.2);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: white; flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,.4);
+        }
+        .cw-header-info { flex: 1; color: white; }
+        .cw-header-name { font-weight: 700; font-size: 15px; }
+        .cw-header-status {
+            font-size: 11px; opacity: .85;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .cw-online-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #00b894;
+            box-shadow: 0 0 0 2px rgba(0,184,148,.3);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { box-shadow: 0 0 0 2px rgba(0,184,148,.3); }
+            50%      { box-shadow: 0 0 0 5px rgba(0,184,148,.1); }
+        }
+        .cw-close-btn {
+            background: rgba(255,255,255,.2); border: none;
+            color: white; width: 32px; height: 32px; border-radius: 50%;
+            cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cw-close-btn:hover { background: rgba(255,255,255,.35); }
+
+        /* Chat window messages */
+        .cw-messages {
+            flex: 1; overflow-y: auto; padding: 14px;
+            display: flex; flex-direction: column; gap: 8px;
+            background: #f8f9fa; min-height: 0;
+        }
+        .cw-msg {
+            max-width: 82%; padding: 9px 13px;
+            border-radius: 14px; font-size: 13px; line-height: 1.4;
+            word-wrap: break-word; position: relative;
+        }
+        .cw-msg.in  {
+            background: white; color: var(--dark);
+            align-self: flex-start; border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.08);
+        }
+        .cw-msg.out {
+            background: linear-gradient(135deg, #0984e3, #6c5ce7);
+            color: white; align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .cw-msg-time { font-size: 10px; opacity: .6; margin-top: 3px; }
+
+        /* Welcome message bubble */
+        .cw-welcome {
+            background: white; border-radius: 14px; padding: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+            margin-bottom: 4px; font-size: 13px; line-height: 1.5;
+            border-left: 3px solid #0984e3;
+        }
+        .cw-welcome strong { color: #0984e3; display: block; margin-bottom: 4px; }
+
+        /* Quick reply chips */
+        .cw-quick-replies {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            padding: 8px 14px 4px;
+        }
+        .cw-chip {
+            background: rgba(9,132,227,.1); color: #0984e3;
+            border: 1px solid rgba(9,132,227,.3); border-radius: 20px;
+            padding: 5px 12px; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all .2s; white-space: nowrap;
+        }
+        .cw-chip:hover { background: #0984e3; color: white; }
+
+        /* Chat window input */
+        .cw-input-bar {
+            display: flex; gap: 8px; padding: 10px 12px;
+            padding-bottom: max(10px, var(--safe-b));
+            background: white;
+            border-top: 1px solid #f0f0f0; flex-shrink: 0;
+        }
+        .cw-input {
+            flex: 1; border: 2px solid #e2e8f0; border-radius: 22px;
+            padding: 9px 14px; font-size: 14px; outline: none;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color .2s;
+        }
+        .cw-input:focus { border-color: #0984e3; }
+        .cw-send {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, #0984e3, #6c5ce7);
+            color: white; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; flex-shrink: 0;
+            transition: transform .2s;
+        }
+        .cw-send:hover  { transform: scale(1.1); }
+        .cw-send:active { transform: scale(.9); }
+
+        /* Login prompt inside chat window */
+        .cw-login-prompt {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 24px; text-align: center; gap: 12px;
+            background: #f8f9fa;
+        }
+        .cw-login-prompt i { font-size: 3rem; color: #0984e3; }
+        .cw-login-prompt p { font-size: 14px; color: var(--mid); line-height: 1.5; }
+        .cw-login-prompt button {
+            background: linear-gradient(135deg, #0984e3, #6c5ce7);
+            color: white; border: none; padding: 12px 28px;
+            border-radius: 25px; font-size: 14px; font-weight: 700;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(9,132,227,.3);
+        }
 
         /* LOADING */
         .loading-wrap{display:none;text-align:center;padding:20px;grid-column:1/-1;}
@@ -440,41 +784,45 @@
     <div class="admin-home-card" id="adminHomeCard" style="display:none;">
         <div class="admin-home-card-header">
             <i class="fas fa-shield-alt"></i>
-            <div>
+            <div style="flex:1;">
                 <h3>Admin Dashboard</h3>
                 <small>AloOttawa · Full Access</small>
             </div>
-            <span id="adminHomeCardStats" style="margin-left:auto;font-size:11px;opacity:.8;"></span>
+            <span id="adminHomeCardStats" style="font-size:11px;opacity:.7;margin-right:8px;"></span>
+            <button onclick="adminLogout()" title="Logout"
+                style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </div>
         <div class="admin-home-btns">
             <button class="admin-home-btn btn-users" onclick="openAdminTo('users')">
                 <i class="fas fa-users"></i>
-                <span>Users</span>
+                <span class="btn-label">Users</span>
                 <span class="btn-count" id="adminCountUsers">–</span>
             </button>
             <button class="admin-home-btn btn-stores" onclick="openAdminTo('stores')">
                 <i class="fas fa-store"></i>
-                <span>Stores</span>
+                <span class="btn-label">Stores</span>
                 <span class="btn-count" id="adminCountStores">–</span>
             </button>
             <button class="admin-home-btn btn-deals" onclick="openAdminTo('deals')">
                 <i class="fas fa-tag"></i>
-                <span>Deals</span>
+                <span class="btn-label">Deals</span>
                 <span class="btn-count" id="adminCountDeals">–</span>
             </button>
             <button class="admin-home-btn btn-chat" onclick="openAdminTo('chat')">
                 <i class="fas fa-comments"></i>
-                <span>User Chat</span>
+                <span class="btn-label">User Chat</span>
                 <span class="btn-count" id="adminCountChats">–</span>
             </button>
             <button class="admin-home-btn btn-reviews" onclick="openAdminTo('reviews')">
                 <i class="fas fa-star"></i>
-                <span>Reviews</span>
+                <span class="btn-label">Reviews</span>
                 <span class="btn-count" id="adminCountReviews">–</span>
             </button>
             <button class="admin-home-btn btn-settings" onclick="openAdminTo('storechat')">
-                <i class="fas fa-store"></i>
-                <span>Store Chat</span>
+                <i class="fas fa-comments"></i>
+                <span class="btn-label">Store Chat</span>
                 <span class="btn-count" id="adminCountStoreChats">–</span>
             </button>
         </div>
@@ -683,7 +1031,7 @@
         <div class="chat-container">
 
             <!-- ── THREAD LIST PANEL ── -->
-            <div id="chatView" style="display:flex;flex-direction:column;height:100%;padding:16px;padding-bottom:max(16px,var(--safe-b));">
+            <div id="chatView" style="flex:1;padding:16px;padding-bottom:max(16px,var(--safe-b));overflow-y:auto;">
                 <div style="display:flex;align-items:center;justify-content:space-between;padding-top:max(0px,var(--safe-t));margin-bottom:12px;">
                     <h4 style="margin:0;font-size:18px;font-weight:700;" id="chatPanelTitle">Chat</h4>
                     <button onclick="closeModal('chatModal')" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--mid);">&times;</button>
@@ -713,7 +1061,7 @@
             </div>
 
             <!-- ── MESSAGES PANEL ── -->
-            <div id="chatMessagesView" style="display:none;flex-direction:column;height:100%;padding:0 16px;padding-bottom:max(16px,var(--safe-b));">
+            <div id="chatMessagesView" style="display:none;padding:0 16px;padding-bottom:max(16px,var(--safe-b));">
                 <div class="chat-header-bar">
                     <button class="chat-back-btn" onclick="backToThreads()"><i class="fas fa-arrow-left"></i></button>
                     <div class="chat-thread-avatar" id="chatWithAvatar">S</div>
@@ -789,60 +1137,16 @@
     <div class="modal-content">
         <span class="close-modal" onclick="closeModal('adminModal')">&times;</span>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-            <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--admin2),var(--admin));border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;"><i class="fas fa-shield-alt"></i></div>
-            <div><h4 style="margin:0;font-size:18px;">Admin Panel</h4><small class="text-muted">AloOttawa Management</small></div>
+            <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--admin2),var(--admin));border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;flex-shrink:0;"><i class="fas fa-shield-alt"></i></div>
+            <div style="flex:1;">
+                <h4 style="margin:0;font-size:18px;">Admin Panel</h4>
+                <small class="text-muted">AloOttawa Management · <span id="adminEmailDisplay" style="color:var(--admin2);font-weight:600;"></span></small>
+            </div>
+            <button onclick="adminLogout()" title="Logout"
+                style="background:#fee2e2;color:#dc2626;border:none;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </div>
-        <!-- FIRESTORE RULES REMINDER — only visible until rules are set -->
-        <div id="rulesReminder" style="background:#fff3cd;border:1px solid #ffc107;border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;">
-            <strong>⚠️ If users/stores don't load:</strong> Your Firestore rules are blocking admin reads.<br>
-            Go to <strong>Firebase Console → Firestore → Rules</strong> and replace with:
-            <pre style="background:#1e272e;color:#00b894;padding:10px;border-radius:8px;margin-top:8px;font-size:11px;overflow-x:auto;white-space:pre;">rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Admin has full access to everything
-    match /{document=**} {
-      allow read, write: if request.auth != null
-        && request.auth.token.email == '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3d5f5248555248515c625052555c505859555859547d445c555252135b4f">[email&#160;protected]</a>';
-    }
-    // Users can read/write their own profile
-    match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-    }
-    // Deals are public
-    match /deals/{id} {
-      allow read: if true;
-    }
-    // Stores are public
-    match /stores/{id} {
-      allow read: if true;
-    }
-    // Reviews are public read, auth write
-    match /reviews/{id} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    // Premium status — own doc only
-    match /premium_users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-    }
-    // Redemptions — auth only
-    match /redemptions/{id} {
-      allow read, write: if request.auth != null;
-    }
-    // Chat threads — auth only
-    match /chatThreads/{id} {
-      allow read, write: if request.auth != null;
-      match /messages/{m} { allow read, write: if request.auth != null; }
-    }
-    match /storeChatThreads/{id} {
-      allow read, write: if request.auth != null;
-      match /messages/{m} { allow read, write: if request.auth != null; }
-    }
-  }
-}</pre>
-            <button onclick="document.getElementById('rulesReminder').style.display='none'" style="background:var(--blue);color:white;border:none;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:6px;">Got it, hide this</button>
-        </div>
-
         <div class="admin-stats-row">
             <div class="admin-stat"><div class="admin-stat-val" id="statUsers">0</div><div class="admin-stat-lbl">Users</div></div>
             <div class="admin-stat"><div class="admin-stat-val" id="statStores">0</div><div class="admin-stat-lbl">Stores</div></div>
@@ -865,15 +1169,20 @@ service cloud.firestore {
                     <div class="form-group"><label class="form-label">Full Name *</label><input type="text" class="form-control" id="au-name" placeholder="User name"></div>
                     <div class="form-group"><label class="form-label">Email *</label><input type="email" class="form-control" id="au-email" placeholder="email@example.com"></div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group"><label class="form-label">Password (new)</label><input type="password" class="form-control" id="au-pass" placeholder="Min 6 chars"></div>
-                    <div class="form-group"><label class="form-label">Status</label>
-                        <select class="form-control" id="au-premium">
-                            <option value="free">Free</option>
-                            <option value="premium">Premium</option>
-                            <option value="store_owner">Store Owner</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Password (new user only)</label>
+                    <input type="password" class="form-control" id="au-pass" placeholder="Min 6 chars">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Access Level</label>
+                    <select class="form-control" id="au-premium" style="height:48px;font-size:14px;border:2px solid #e2e8f0;border-radius:12px;padding:0 12px;cursor:pointer;background:white;">
+                        <option value="free">🔓 Free User</option>
+                        <option value="trial3">🎁 3-Day Trial</option>
+                        <option value="trial7">🎁 7-Day Trial</option>
+                        <option value="premium30">👑 Premium — 30 Days</option>
+                        <option value="premium90">👑 Premium — 90 Days</option>
+                        <option value="store_owner">🏪 Store Owner</option>
+                    </select>
                 </div>
                 <!-- Store owner: link to their store -->
                 <div class="form-group" id="au-storeGroup" style="display:none;">
@@ -996,6 +1305,46 @@ service cloud.firestore {
 </div>
 
 <div id="alertContainer"></div>
+
+<!-- ==================== FLOATING CHAT WIDGET ==================== -->
+<button class="float-chat-btn" id="floatChatBtn" onclick="toggleChatWindow()" style="display:none;" aria-label="Chat with us">
+    <i class="fas fa-comments" id="floatChatIcon"></i>
+    <span class="float-chat-badge" id="floatChatBadge" style="display:none;">0</span>
+    <span class="float-chat-tooltip">Chat with us</span>
+</button>
+
+<div class="chat-window" id="chatWindow">
+    <div class="cw-header">
+        <div class="cw-avatar"><i class="fas fa-headset"></i></div>
+        <div class="cw-header-info">
+            <div class="cw-header-name">AloOttawa Support</div>
+            <div class="cw-header-status"><span class="cw-online-dot"></span> Typically replies in minutes</div>
+        </div>
+        <button class="cw-close-btn" onclick="toggleChatWindow()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cw-messages" id="cwMessages">
+        <div id="cwWelcomeMsg" class="cw-welcome">
+            <strong>👋 Hello!</strong>
+            Welcome to AloOttawa! How can we help you today?
+        </div>
+    </div>
+    <div class="cw-quick-replies" id="cwQuickReplies">
+        <span class="cw-chip" onclick="cwSendQuick('I need help with a deal')">🏷️ Deal help</span>
+        <span class="cw-chip" onclick="cwSendQuick('I have a payment issue')">💳 Payment</span>
+        <span class="cw-chip" onclick="cwSendQuick('How does Premium work?')">👑 Premium</span>
+        <span class="cw-chip" onclick="cwSendQuick('I want to report an issue')">🚨 Report</span>
+    </div>
+    <div class="cw-login-prompt" id="cwLoginPrompt" style="display:none;">
+        <i class="fas fa-lock"></i>
+        <p>Login to chat with our support team</p>
+        <button onclick="openLogin();closeChatWindow();">Login to Chat</button>
+    </div>
+    <div class="cw-input-bar" id="cwInputBar">
+        <input type="text" class="cw-input" id="cwInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')cwSend()">
+        <button class="cw-send" onclick="cwSend()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1222,6 +1571,8 @@ async function onSignedIn(user) {
         loadUserSavings();
         if (isAdmin) loadAdminData();
         listenUnreadBadge();
+        // Start floating chat listener for non-admin users
+        if (!isAdminUser) cwLoadThread();
 
         const firstName = (currentUser.name || 'there').split(' ')[0];
         const welcomeMsg = isAdmin
@@ -1247,9 +1598,23 @@ function onSignedOut() {
 
 async function loadPremiumStatus(uid) {
     try{
-        const doc=await db.collection('premium_users').doc(uid).get();
-        isPremium = doc.exists && doc.data().isPremium && new Date(doc.data().endDate)>=new Date();
-    }catch(e){ isPremium=false; }
+        const doc = await db.collection('premium_users').doc(uid).get();
+        if(!doc.exists){ isPremium=false; return; }
+        const d = doc.data();
+        if(!d.isPremium){ isPremium=false; return; }
+        // Support both endDate (old) and premiumEnd (new)
+        const expiry = d.premiumEnd || d.endDate;
+        if(!expiry){ isPremium=true; return; }   // no expiry = permanent
+        const expired = new Date(expiry) < new Date();
+        if(expired){
+            // Auto-expire in Firestore silently
+            db.collection('premium_users').doc(uid).update({isPremium:false}).catch(()=>{});
+            db.collection('users').doc(uid).update({isPremium:false}).catch(()=>{});
+            isPremium = false;
+        } else {
+            isPremium = true;
+        }
+    } catch(e){ isPremium=false; }
 }
 
 async function doLogin() {
@@ -1324,8 +1689,23 @@ async function doReset() {
 
 async function doLogout() {
     if(!confirm('Logout?'))return;
+    closeChatWindow();
     await auth.signOut();
-    toast('Logged out','info'); closeModal('profileModal');
+    toast('Logged out','info');
+    closeModal('profileModal');
+    closeModal('adminModal');
+}
+
+// Separate logout entry point from admin panel
+async function adminLogout() {
+    if(!confirm('Logout from Admin Panel?'))return;
+    try{
+        closeModal('adminModal');
+        await auth.signOut();
+        toast('Admin logged out successfully','info');
+    } catch(e){
+        toast('Logout error: '+e.message,'danger');
+    }
 }
 
 // ================================================================
@@ -1384,6 +1764,8 @@ function updateUI() {
 
     if(allDeals.length) displayDeals();
     updateTime();
+    // Show/hide floating chat button based on login state
+    updateFloatChatBtn();
 }
 
 // ================================================================
@@ -1613,7 +1995,7 @@ function openStoreChat(){
 
 function renderChatPanel(){
     // Show thread list, hide messages
-    document.getElementById('chatView').style.display='flex';
+    document.getElementById('chatView').style.display='block';
     document.getElementById('chatMessagesView').style.display='none';
     document.getElementById('chatThreadList').innerHTML='';
     document.getElementById('chatThreadEmpty').style.display='none';
@@ -1787,7 +2169,7 @@ function backToThreads(){
     if(chatMsgListener){ chatMsgListener(); chatMsgListener=null; }
     currentChatThread=null;
     document.getElementById('chatMessagesView').style.display='none';
-    document.getElementById('chatView').style.display='flex';
+    document.getElementById('chatView').style.display='block';
     // Refresh threads list
     if(isAdmin) loadAdminAllThreads(); else loadUserThreads();
 }
@@ -1845,6 +2227,9 @@ function openAdminPanel(){
         toast('Access denied — admin only','danger');
         return;
     }
+    // Show admin email in panel header
+    const emailEl = document.getElementById('adminEmailDisplay');
+    if(emailEl && currentUser) emailEl.textContent = currentUser.email || '';
     loadAdminData();
     openModal('adminModal');
     document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
@@ -1984,26 +2369,85 @@ function renderUsers(){
     const filtered=allUsers.filter(u=>(u.name||'').toLowerCase().includes(search)||(u.email||'').toLowerCase().includes(search));
     if(!filtered.length){ document.getElementById('usersList').innerHTML='<div class="text-center py-3 text-muted">No users found</div>'; return; }
     document.getElementById('usersList').innerHTML=filtered.map(u=>{
-        const isBlocked = u.blocked===true;
-        const statusBadge = u.type==='store_owner'?'badge-store':u.isPremium?'badge-premium':'badge-free';
-        const statusLabel = u.type==='store_owner'?'Store Owner':u.isPremium?'Premium':'Free';
-        const storeName = u.type==='store_owner'&&u.storeId ? (allStores.find(s=>s.id===u.storeId)?.name||u.storeId) : null;
+        const isBlocked  = u.blocked===true;
+        const isPrem     = u.isPremium===true;
+        const isTrial    = u.premiumType==='trial';
+        const statusBadge= u.type==='store_owner'?'badge-store':isPrem?(isTrial?'badge-trial':'badge-premium'):'badge-free';
+        const statusLabel= u.type==='store_owner'?'Store Owner':isPrem?(isTrial?'Trial':'Premium'):'Free';
+        const storeName  = u.type==='store_owner'&&u.storeId?(allStores.find(s=>s.id===u.storeId)?.name||u.storeId):null;
+
+        // Premium expiry info
+        let expiryInfo = '';
+        if(isPrem && u.premiumEnd){
+            const end = new Date(u.premiumEnd);
+            const now = new Date();
+            const daysLeft = Math.ceil((end-now)/(1000*60*60*24));
+            const expired  = daysLeft <= 0;
+            expiryInfo = expired
+                ? '<span style="color:var(--red);font-size:11px;"> · EXPIRED</span>'
+                : `<span style="color:var(--green);font-size:11px;"> · ${daysLeft}d left (${end.toLocaleDateString()})</span>`;
+        }
+
         return `
-        <div class="user-row" style="${isBlocked?'opacity:0.65;border-left:3px solid var(--red);':''}">
-            <div class="user-row-info">
+        <div class="user-row" style="${isBlocked?'opacity:0.6;border-left:3px solid var(--red);':isPrem?'border-left:3px solid var(--gold);':''}">
+            <div class="user-row-info" style="flex:1;">
                 <div class="user-row-name">
-                    ${isBlocked?'<i class="fas fa-ban" style="color:var(--red);font-size:11px;margin-right:4px;"></i>':''}
+                    ${isBlocked?'<i class="fas fa-ban" style="color:var(--red);font-size:10px;margin-right:3px;"></i>':''}
                     ${u.name||'–'}
                     <span class="user-row-badge ${statusBadge}">${statusLabel}</span>
                 </div>
-                <div class="user-row-email">${u.email||''}</div>
+                <div class="user-row-email" style="font-size:12px;">${u.email||''}</div>
                 ${storeName?`<div style="font-size:11px;color:var(--store2);"><i class="fas fa-store"></i> ${storeName}</div>`:''}
-                <div style="font-size:11px;color:#aaa;">Joined: ${fmtDate(u.createdAt||'')} ${isBlocked?'· <span style="color:var(--red);">BLOCKED</span>':''}</div>
+                <div style="font-size:11px;color:#aaa;">
+                    Joined: ${fmtDate(u.createdAt||'')}
+                    ${expiryInfo}
+                    ${isBlocked?'<span style="color:var(--red);"> · BLOCKED</span>':''}
+                </div>
+
+                <!-- PREMIUM GRANT CONTROLS (inline) -->
+                ${!isPrem ? `
+                <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;">
+                    <button onclick="grantPremium('${u.id}','trial',3)"
+                        style="background:linear-gradient(135deg,#fd79a8,#e84393);color:white;border:none;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">
+                        🎁 3-Day Trial
+                    </button>
+                    <button onclick="grantPremium('${u.id}','trial',7)"
+                        style="background:linear-gradient(135deg,#a29bfe,#6c5ce7);color:white;border:none;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">
+                        🎁 7-Day Trial
+                    </button>
+                    <button onclick="grantPremium('${u.id}','premium',30)"
+                        style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:#2d3436;border:none;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">
+                        👑 30 Days
+                    </button>
+                    <button onclick="grantPremium('${u.id}','premium',90)"
+                        style="background:linear-gradient(135deg,var(--gold),var(--store2));color:white;border:none;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">
+                        👑 90 Days
+                    </button>
+                    <button onclick="grantPremiumCustom('${u.id}')"
+                        style="background:var(--blue);color:white;border:none;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">
+                        ✏️ Custom
+                    </button>
+                </div>` : `
+                <div style="display:flex;gap:4px;margin-top:6px;">
+                    <button onclick="revokePremium('${u.id}')"
+                        style="background:#fee2e2;color:#dc2626;border:none;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">
+                        ✕ Revoke Premium
+                    </button>
+                    <button onclick="extendPremium('${u.id}')"
+                        style="background:#dcfce7;color:#16a34a;border:none;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">
+                        + Extend 30d
+                    </button>
+                </div>`}
             </div>
-            <div style="display:flex;flex-direction:column;gap:5px;min-width:90px;">
-                <button onclick="toggleUserPremium('${u.id}',${!u.isPremium})" class="${u.isPremium?'btn-danger-sm':'btn-success-sm'}" style="font-size:11px;">${u.isPremium?'Revoke':'Premium'}</button>
-                <button onclick="toggleUserBlock('${u.id}',${!isBlocked})" class="${isBlocked?'btn-success-sm':'btn-danger-sm'}" style="font-size:11px;">${isBlocked?'Unblock':'Block'}</button>
-                <button onclick="deleteUser('${u.id}')" class="btn-danger-sm" style="font-size:11px;"><i class="fas fa-trash"></i> Delete</button>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-left:8px;">
+                <button onclick="toggleUserBlock('${u.id}',${!isBlocked})"
+                    class="${isBlocked?'btn-success-sm':'btn-danger-sm'}" style="font-size:11px;white-space:nowrap;">
+                    ${isBlocked?'✅ Unblock':'🚫 Block'}
+                </button>
+                <button onclick="deleteUser('${u.id}')"
+                    class="btn-danger-sm" style="font-size:11px;">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         </div>`;
     }).join('');
@@ -2012,36 +2456,139 @@ function renderUsers(){
 async function adminAddUser(){
     const name=v('au-name'),email=v('au-email'),pass=v('au-pass'),status=v('au-premium'),storeId=v('au-store');
     if(!name||!email){ showErr('addUserError','Name and email are required'); return; }
-    const isStoreType=status==='store_owner';
+    const isStoreType = status==='store_owner';
+    const premiumDaysMap = { trial3:3, trial7:7, premium30:30, premium90:90 };
+    const premiumDays    = premiumDaysMap[status] || null;
+    const isPremiumStatus= !!premiumDays;
+    const premiumType    = status.startsWith('trial') ? 'trial' : 'premium';
+    const userType       = isStoreType ? 'store_owner' : 'user';
+
     try{
         if(pass) toast('Note: Auth accounts need Firebase Console or Admin SDK.','info');
-        const existing=allUsers.find(u=>u.email===email);
-        const userData={ name, email, isPremium:status==='premium', type:status, updatedAt:new Date().toISOString(), ...(isStoreType&&storeId?{storeId}:{}) };
+        const existing = allUsers.find(u=>u.email===email);
+        const userData = {
+            name, email,
+            isPremium:  isPremiumStatus,
+            premiumType: isPremiumStatus ? premiumType : null,
+            type: userType,
+            updatedAt: new Date().toISOString(),
+            ...(isStoreType&&storeId ? {storeId} : {})
+        };
+
+        let uid;
         if(existing){
-            await db.collection('users').doc(existing.id).update(userData);
-            if(status==='premium') await db.collection('premium_users').doc(existing.id).set({isPremium:true,activatedBy:'admin',activatedAt:new Date().toISOString(),endDate:new Date(Date.now()+30*24*60*60*1000).toISOString()});
-            // If assigning as store owner, update store record too
-            if(isStoreType&&storeId) await db.collection('stores').doc(storeId).update({ownerUserId:existing.id,ownerEmail:email});
-        }else{
-            const ref=await db.collection('users').add({...userData,createdAt:new Date().toISOString()});
-            if(status==='premium') await db.collection('premium_users').doc(ref.id).set({isPremium:true,activatedBy:'admin',activatedAt:new Date().toISOString(),endDate:new Date(Date.now()+30*24*60*60*1000).toISOString()});
-            if(isStoreType&&storeId) await db.collection('stores').doc(storeId).update({ownerUserId:ref.id,ownerEmail:email});
+            uid = existing.id;
+            await db.collection('users').doc(uid).update(userData);
+            if(isStoreType&&storeId) await db.collection('stores').doc(storeId).update({ownerUserId:uid,ownerEmail:email});
+        } else {
+            const ref = await db.collection('users').add({...userData, createdAt:new Date().toISOString()});
+            uid = ref.id;
+            if(isStoreType&&storeId) await db.collection('stores').doc(storeId).update({ownerUserId:uid,ownerEmail:email});
         }
+
+        // Grant premium if applicable
+        if(isPremiumStatus && uid) await grantPremium(uid, premiumType, premiumDays);
+
         toast('User saved!','success');
         ['au-name','au-email','au-pass'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
         document.getElementById('au-storeGroup').style.display='none';
         loadAdminData();
-    }catch(e){ showErr('addUserError','Error: '+e.message); }
+    } catch(e){ showErr('addUserError','Error: '+e.message); }
 }
 
-async function toggleUserPremium(uid, grant){
+// ── Core function: grant premium or trial for N days ──
+async function grantPremium(uid, type, days){
+    const label = type==='trial' ? `${days}-day Trial` : `${days}-day Premium`;
     try{
-        await db.collection('users').doc(uid).update({isPremium:grant});
-        const pd={isPremium:grant,activatedBy:'admin',updatedAt:new Date().toISOString()};
-        if(grant) pd.endDate=new Date(Date.now()+30*24*60*60*1000).toISOString();
-        await db.collection('premium_users').doc(uid).set(pd,{merge:true});
-        toast(`Premium ${grant?'granted':'revoked'}`,'success'); loadAdminData();
-    }catch(e){ toast('Error: '+e.message,'danger'); }
+        const now    = new Date();
+        const endDate= new Date(now.getTime() + days*24*60*60*1000);
+        const data   = {
+            isPremium:   true,
+            premiumType: type,           // 'premium' | 'trial'
+            premiumDays: days,
+            premiumStart:now.toISOString(),
+            premiumEnd:  endDate.toISOString(),
+            endDate:     endDate.toISOString(),  // kept for compatibility
+            activatedBy: 'admin',
+            activatedAt: now.toISOString(),
+            grantedTo:   uid
+        };
+        // Write to both collections so loadPremiumStatus() works
+        await db.collection('premium_users').doc(uid).set(data);
+        await db.collection('users').doc(uid).update({
+            isPremium:   true,
+            premiumType: type,
+            premiumEnd:  endDate.toISOString(),
+            updatedAt:   now.toISOString()
+        });
+        toast(`✅ ${label} granted! Expires ${endDate.toLocaleDateString()}`, 'success');
+        loadAdminData();
+    } catch(e){
+        toast('Error: '+e.message, 'danger');
+        console.error('[Admin] grantPremium error:', e);
+    }
+}
+
+// ── Custom days prompt ──
+function grantPremiumCustom(uid){
+    const days = parseInt(prompt('Enter number of days for premium access (e.g. 14):'));
+    if(!days || isNaN(days) || days < 1 || days > 3650){
+        toast('Invalid number of days (1–3650)', 'warning');
+        return;
+    }
+    const type = days <= 7 ? 'trial' : 'premium';
+    grantPremium(uid, type, days);
+}
+
+// ── Extend existing premium by 30 days ──
+async function extendPremium(uid){
+    try{
+        const doc = await db.collection('premium_users').doc(uid).get();
+        let currentEnd = new Date();
+        if(doc.exists && doc.data().endDate){
+            const stored = new Date(doc.data().endDate);
+            // If still active, extend from current end; if expired, extend from now
+            if(stored > currentEnd) currentEnd = stored;
+        }
+        const newEnd = new Date(currentEnd.getTime() + 30*24*60*60*1000);
+        await db.collection('premium_users').doc(uid).update({
+            endDate:    newEnd.toISOString(),
+            premiumEnd: newEnd.toISOString(),
+            updatedAt:  new Date().toISOString()
+        });
+        await db.collection('users').doc(uid).update({
+            premiumEnd: newEnd.toISOString(),
+            updatedAt:  new Date().toISOString()
+        });
+        toast(`✅ Extended! New expiry: ${newEnd.toLocaleDateString()}`, 'success');
+        loadAdminData();
+    } catch(e){ toast('Error: '+e.message, 'danger'); }
+}
+
+// ── Revoke premium immediately ──
+async function revokePremium(uid){
+    if(!confirm('Revoke this user\'s premium access immediately?')) return;
+    try{
+        await db.collection('premium_users').doc(uid).set({
+            isPremium:   false,
+            revokedAt:   new Date().toISOString(),
+            revokedBy:   'admin'
+        });
+        await db.collection('users').doc(uid).update({
+            isPremium:   false,
+            premiumType: null,
+            premiumEnd:  null,
+            updatedAt:   new Date().toISOString()
+        });
+        toast('Premium revoked', 'info');
+        loadAdminData();
+    } catch(e){ toast('Error: '+e.message, 'danger'); }
+}
+
+// Keep old name as alias for backward compat
+async function toggleUserPremium(uid, grant){
+    if(grant) grantPremium(uid, 'premium', 30);
+    else revokePremium(uid);
 }
 
 async function toggleUserBlock(uid, block){
@@ -2301,6 +2848,247 @@ function fbErr(e){
         'auth/operation-not-allowed': 'Email login is not enabled. Contact support.'
     };
     return m[e.code] || ('Login error (' + (e.code||'unknown') + '): ' +e.message);
+}
+
+// ================================================================
+//  FLOATING CHAT WIDGET
+// ================================================================
+let chatWindowOpen   = false;
+let cwThreadId       = null;
+let cwMsgListener    = null;
+let cwUnread         = 0;
+
+/* Show/hide the floating button based on login state */
+function updateFloatChatBtn() {
+    const btn = document.getElementById('floatChatBtn');
+    if (!btn) return;
+    // Show for logged-in non-admin users only
+    // Admin uses the full Admin Panel chat instead
+    if (currentUser && !isAdmin) {
+        btn.style.display = 'flex';
+    } else {
+        btn.style.display = 'none';
+        closeChatWindow();
+    }
+}
+
+function toggleChatWindow() {
+    chatWindowOpen ? closeChatWindow() : openChatWindow();
+}
+
+function openChatWindow() {
+    chatWindowOpen = true;
+    const win = document.getElementById('chatWindow');
+    const btn = document.getElementById('floatChatBtn');
+    win.classList.add('open');
+    // Swap icon to X
+    document.getElementById('floatChatIcon').className = 'fas fa-times';
+    btn.style.background = 'linear-gradient(135deg, #636e72, #2d3436)';
+    // Reset unread badge
+    cwUnread = 0;
+    updateCwBadge();
+    btn.classList.remove('has-unread');
+    // Load messages if user is logged in
+    if (currentUser) {
+        document.getElementById('cwLoginPrompt').style.display = 'none';
+        document.getElementById('cwInputBar').style.display    = 'flex';
+        cwLoadThread();
+    } else {
+        document.getElementById('cwLoginPrompt').style.display = 'flex';
+        document.getElementById('cwInputBar').style.display    = 'none';
+        document.getElementById('cwQuickReplies').style.display = 'none';
+    }
+    // Focus input
+    setTimeout(() => {
+        const inp = document.getElementById('cwInput');
+        if (inp) inp.focus();
+    }, 300);
+}
+
+function closeChatWindow() {
+    chatWindowOpen = false;
+    const win = document.getElementById('chatWindow');
+    win.classList.remove('open');
+    // Restore icon
+    document.getElementById('floatChatIcon').className = 'fas fa-comments';
+    const btn = document.getElementById('floatChatBtn');
+    if (btn) btn.style.background = 'linear-gradient(135deg, #0984e3, #6c5ce7)';
+    // Detach listener
+    if (cwMsgListener) { cwMsgListener(); cwMsgListener = null; }
+}
+
+/* Load or create the user's support thread and listen for messages */
+async function cwLoadThread() {
+    if (!currentUser) return;
+    try {
+        // Find existing thread
+        const snap = await db.collection('chatThreads')
+            .where('userId', '==', currentUser.uid).limit(1).get();
+
+        if (!snap.empty) {
+            cwThreadId = snap.docs[0].id;
+        } else {
+            // Create new thread
+            const ref = await db.collection('chatThreads').add({
+                type:       'support',
+                userId:     currentUser.uid,
+                userName:   currentUser.name || currentUser.email,
+                userEmail:  currentUser.email,
+                adminId:    ADMIN_EMAIL,
+                adminName:  'Support',
+                lastMessage:'',
+                createdAt:  new Date().toISOString(),
+                updatedAt:  new Date().toISOString(),
+                adminUnread: 1,
+                userUnread:  0
+            });
+            cwThreadId = ref.id;
+        }
+
+        // Mark user messages as read
+        db.collection('chatThreads').doc(cwThreadId)
+            .update({ userUnread: 0 }).catch(() => {});
+
+        // Start real-time listener
+        cwListenMessages();
+    } catch(e) {
+        console.error('[CW] Thread load error:', e);
+    }
+}
+
+function cwListenMessages() {
+    if (!cwThreadId) return;
+    if (cwMsgListener) { cwMsgListener(); cwMsgListener = null; }
+
+    cwMsgListener = db.collection('chatThreads').doc(cwThreadId)
+        .collection('messages')
+        .orderBy('timestamp', 'asc')
+        .onSnapshot(snap => {
+            const area = document.getElementById('cwMessages');
+            if (!area) return;
+
+            // Hide welcome message once real messages exist
+            if (!snap.empty) {
+                const welcome = document.getElementById('cwWelcomeMsg');
+                if (welcome) welcome.style.display = 'none';
+                const chips = document.getElementById('cwQuickReplies');
+                if (chips) chips.style.display = 'none';
+            }
+
+            area.innerHTML = '';
+            snap.docs.forEach(d => {
+                const msg   = d.data();
+                const isOut = msg.senderId === currentUser.uid;
+                const div   = document.createElement('div');
+                div.className = `cw-msg ${isOut ? 'out' : 'in'}`;
+
+                const time = msg.timestamp
+                    ? new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
+                    : '';
+
+                div.innerHTML = `
+                    ${!isOut ? `<div style="font-size:10px;font-weight:700;color:#0984e3;margin-bottom:3px;">Support</div>` : ''}
+                    ${msg.text}
+                    <div class="cw-msg-time">${time}</div>
+                `;
+                area.appendChild(div);
+            });
+            area.scrollTop = area.scrollHeight;
+
+            // If window is closed, increment unread for incoming messages
+            if (!chatWindowOpen && !snap.empty) {
+                const last = snap.docs[snap.docs.length - 1].data();
+                if (last.senderId !== currentUser.uid) {
+                    cwUnread++;
+                    updateCwBadge();
+                    const btn = document.getElementById('floatChatBtn');
+                    if (btn) btn.classList.add('has-unread');
+                }
+            }
+        });
+}
+
+function updateCwBadge() {
+    const badge = document.getElementById('floatChatBadge');
+    if (!badge) return;
+    if (cwUnread > 0) {
+        badge.style.display = 'flex';
+        badge.textContent   = cwUnread > 9 ? '9+' : cwUnread;
+    } else {
+        badge.style.display = 'none';
+    }
+    // Also update the nav badge
+    const navBadge = document.getElementById('chatBadge');
+    if (navBadge) {
+        navBadge.style.display = cwUnread > 0 ? 'flex' : 'none';
+        navBadge.textContent   = cwUnread > 9 ? '9+' : cwUnread;
+    }
+}
+
+async function cwSend() {
+    const input = document.getElementById('cwInput');
+    const text  = (input ? input.value : '').trim();
+    if (!text || !currentUser) return;
+    input.value = '';
+
+    // Ensure thread exists
+    if (!cwThreadId) await cwLoadThread();
+    if (!cwThreadId) return;
+
+    const now = new Date().toISOString();
+    const msg = {
+        text,
+        senderId:   currentUser.uid,
+        senderName: currentUser.name || currentUser.email,
+        timestamp:  now
+    };
+    try {
+        await db.collection('chatThreads').doc(cwThreadId)
+            .collection('messages').add(msg);
+        await db.collection('chatThreads').doc(cwThreadId).update({
+            lastMessage:  text,
+            updatedAt:    now,
+            adminUnread:  firebase.firestore.FieldValue.increment(1)
+        });
+        // Auto-reply from bot after 1.2s (first message only)
+        const area = document.getElementById('cwMessages');
+        if (area && area.querySelectorAll('.cw-msg').length <= 1) {
+            setTimeout(cwAutoReply, 1200);
+        }
+    } catch(e) {
+        console.error('[CW] Send error:', e);
+        toast('Failed to send message', 'danger');
+    }
+}
+
+function cwSendQuick(text) {
+    const input = document.getElementById('cwInput');
+    if (input) input.value = text;
+    if (!currentUser) {
+        openLogin(); closeChatWindow(); return;
+    }
+    cwSend();
+}
+
+/* Instant bot reply for the very first message */
+async function cwAutoReply() {
+    if (!cwThreadId) return;
+    const now = new Date().toISOString();
+    try {
+        await db.collection('chatThreads').doc(cwThreadId)
+            .collection('messages').add({
+                text:       "Thanks for reaching out! 👋 Our support team will reply shortly. In the meantime, check your Premium status in your Profile.",
+                senderId:   'support_bot',
+                senderName: 'Support',
+                timestamp:  now,
+                isBot:      true
+            });
+        await db.collection('chatThreads').doc(cwThreadId).update({
+            lastMessage: 'Thanks for reaching out! Our support team will reply shortly.',
+            updatedAt:   now,
+            userUnread:  firebase.firestore.FieldValue.increment(1)
+        });
+    } catch(e) { /* silent */ }
 }
 
 // ================================================================

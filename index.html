@@ -457,7 +457,10 @@
     els.langSelect.appendChild(opt);
   });
   const savedLang = localStorage.getItem('lisan_lang');
-  els.langSelect.value = savedLang || 'auto';
+  // Default to en-US rather than "auto": if the phone's system language is Arabic,
+  // "auto" would tell the recognizer to listen FOR Arabic, which garbles any other
+  // language being spoken. Users can still switch to "auto" or any dialect manually.
+  els.langSelect.value = savedLang || 'en-US';
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
@@ -465,6 +468,8 @@
   let userStopped = true;
   let audioCtx, analyser, micSource, rafId;
   let translateQueue = Promise.resolve();
+  let restartTimer = null;
+  let watchdogTimer = null;
 
   function setStatus(text, cls){
     els.statusText.textContent = text;
@@ -484,6 +489,7 @@
     r.lang = recogLangCode();
 
     r.onresult = (e) => {
+      resetWatchdog();
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++){
         const res = e.results[i];
@@ -502,27 +508,59 @@
     };
 
     r.onerror = (e) => {
-      if (e.error === 'no-speech') return;
+      if (e.error === 'no-speech' || e.error === 'aborted') return; // expected, handled by onend restart
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed'){
         setStatus('تم رفض إذن الميكروفون', 'err');
+        userStopped = true;
         stopListening();
         return;
       }
-      setStatus('حدث خطأ: ' + e.error, 'err');
+      // network / audio-capture / etc — surface it but still let onend try to recover
+      setStatus('خطأ مؤقت (' + e.error + ') — إعادة المحاولة…', 'err');
+    };
+
+    r.onstart = () => {
+      listening = true;
+      updateMicVisual();
+      setStatus('أستمع الآن…');
+      resetWatchdog();
     };
 
     r.onend = () => {
       listening = false;
-      updateMicVisual();
-      if (!userStopped){
-        // browsers auto-stop after silence; restart to stay "always listening"
-        try { r.start(); listening = true; updateMicVisual(); } catch(_) {}
-      } else {
+      if (userStopped){
+        updateMicVisual();
         setStatus('اضغط للبدء بالاستماع', 'idle');
+        return;
       }
+      // Always build a brand-new recognizer for the restart — reusing the same
+      // instance right after "onend" throws "already started" on many browsers,
+      // which was silently swallowed before and left the UI stuck on "listening"
+      // while nothing was actually running.
+      clearTimeout(restartTimer);
+      restartTimer = setTimeout(() => {
+        if (userStopped) return;
+        try{
+          recognition = buildRecognition();
+          recognition.start();
+        } catch(err){
+          setStatus('تعذّرت إعادة التشغيل — اضغط للمحاولة يدويًا', 'err');
+        }
+      }, 250);
     };
 
     return r;
+  }
+
+  function resetWatchdog(){
+    clearTimeout(watchdogTimer);
+    // If nothing happens (no restart, no result) for a while even though we
+    // think we're "listening", force a clean restart instead of staying stuck.
+    watchdogTimer = setTimeout(() => {
+      if (!userStopped && listening){
+        try{ recognition && recognition.stop(); }catch(_){}
+      }
+    }, 12000);
   }
 
   function escapeHtml(s){
@@ -609,9 +647,6 @@
       recognition = buildRecognition();
       userStopped = false;
       recognition.start();
-      listening = true;
-      updateMicVisual();
-      setStatus('أستمع الآن…');
       els.overlay.classList.add('hidden');
     } catch(err){
       setStatus('تعذّر الوصول إلى الميكروفون', 'err');
@@ -621,6 +656,8 @@
 
   function stopListening(){
     userStopped = true;
+    clearTimeout(restartTimer);
+    clearTimeout(watchdogTimer);
     if (recognition){ try{ recognition.stop(); }catch(_){} }
     listening = false;
     updateMicVisual();

@@ -402,36 +402,81 @@
 
 <script>
 (function(){
-  const LANGS = [
-    { code: "auto",  label: "تلقائي (لغة الجهاز)" },
-    { code: "en-US", label: "English — US" },
-    { code: "en-GB", label: "English — UK" },
-    { code: "en-IN", label: "English — India" },
-    { code: "es-ES", label: "Español — España" },
-    { code: "es-MX", label: "Español — México" },
-    { code: "fr-FR", label: "Français — France" },
-    { code: "fr-CA", label: "Français — Canada" },
-    { code: "de-DE", label: "Deutsch" },
-    { code: "it-IT", label: "Italiano" },
-    { code: "pt-BR", label: "Português — Brasil" },
-    { code: "pt-PT", label: "Português — Portugal" },
-    { code: "ru-RU", label: "Русский" },
-    { code: "tr-TR", label: "Türkçe" },
-    { code: "fa-IR", label: "فارسی" },
-    { code: "ur-PK", label: "اردو" },
-    { code: "hi-IN", label: "हिन्दी" },
-    { code: "bn-BD", label: "বাংলা" },
-    { code: "zh-CN", label: "中文 — 普通话" },
-    { code: "ja-JP", label: "日本語" },
-    { code: "ko-KR", label: "한국어" },
-    { code: "id-ID", label: "Bahasa Indonesia" },
-    { code: "ar-SA", label: "العربية — نجدية/خليجية" },
-    { code: "ar-EG", label: "العربية — مصرية" },
-    { code: "ar-AE", label: "العربية — إماراتية" },
-    { code: "ar-MA", label: "العربية — مغربية" },
-    { code: "ar-DZ", label: "العربية — جزائرية" },
-    { code: "ar-LB", label: "العربية — شامية" },
-    { code: "ar-IQ", label: "العربية — عراقية" },
+  const LANG_GROUPS = [
+    {
+      group: null, // ungrouped, shown first
+      items: [
+        { code: "auto",  label: "تلقائي (لغة الجهاز)" },
+      ]
+    },
+    {
+      group: "الهند — India",
+      items: [
+        { code: "en-IN", label: "English — Indian accent" },
+        { code: "hi-IN", label: "हिन्दी — Hindi" },
+        { code: "bn-IN", label: "বাংলা — Bengali (India)" },
+        { code: "ta-IN", label: "தமிழ் — Tamil" },
+        { code: "te-IN", label: "తెలుగు — Telugu" },
+        { code: "mr-IN", label: "मराठी — Marathi" },
+        { code: "gu-IN", label: "ગુજરાતી — Gujarati" },
+        { code: "kn-IN", label: "ಕನ್ನಡ — Kannada" },
+        { code: "ml-IN", label: "മലയാളം — Malayalam" },
+        { code: "pa-IN", label: "ਪੰਜਾਬੀ — Punjabi" },
+        { code: "ur-IN", label: "اردو (الهند) — Urdu (India)" },
+        { code: "or-IN", label: "ଓଡ଼ିଆ — Odia" },
+        { code: "as-IN", label: "অসমীয়া — Assamese" },
+      ]
+    },
+    {
+      group: "الإنجليزية — English",
+      items: [
+        { code: "en-US", label: "English — US" },
+        { code: "en-GB", label: "English — UK" },
+        { code: "en-AU", label: "English — Australia" },
+        { code: "en-CA", label: "English — Canada" },
+      ]
+    },
+    {
+      group: "أوروبية",
+      items: [
+        { code: "es-ES", label: "Español — España" },
+        { code: "es-MX", label: "Español — México" },
+        { code: "fr-FR", label: "Français — France" },
+        { code: "fr-CA", label: "Français — Canada" },
+        { code: "de-DE", label: "Deutsch" },
+        { code: "it-IT", label: "Italiano" },
+        { code: "pt-BR", label: "Português — Brasil" },
+        { code: "pt-PT", label: "Português — Portugal" },
+        { code: "ru-RU", label: "Русский" },
+        { code: "tr-TR", label: "Türkçe" },
+      ]
+    },
+    {
+      group: "آسيوية أخرى",
+      items: [
+        { code: "fa-IR", label: "فارسی" },
+        { code: "ur-PK", label: "اردو (باكستان) — Urdu (Pakistan)" },
+        { code: "bn-BD", label: "বাংলা — Bengali (Bangladesh)" },
+        { code: "ne-NP", label: "नेपाली — Nepali" },
+        { code: "si-LK", label: "සිංහල — Sinhala" },
+        { code: "zh-CN", label: "中文 — 普通话" },
+        { code: "ja-JP", label: "日本語" },
+        { code: "ko-KR", label: "한국어" },
+        { code: "id-ID", label: "Bahasa Indonesia" },
+      ]
+    },
+    {
+      group: "العربية ولهجاتها",
+      items: [
+        { code: "ar-SA", label: "العربية — نجدية/خليجية" },
+        { code: "ar-EG", label: "العربية — مصرية" },
+        { code: "ar-AE", label: "العربية — إماراتية" },
+        { code: "ar-MA", label: "العربية — مغربية" },
+        { code: "ar-DZ", label: "العربية — جزائرية" },
+        { code: "ar-LB", label: "العربية — شامية" },
+        { code: "ar-IQ", label: "العربية — عراقية" },
+      ]
+    },
   ];
 
   const els = {
@@ -450,11 +495,25 @@
     unsupportedMsg: document.getElementById('unsupportedMsg'),
   };
 
-  LANGS.forEach(l => {
-    const opt = document.createElement('option');
-    opt.value = l.code;
-    opt.textContent = l.label;
-    els.langSelect.appendChild(opt);
+  LANG_GROUPS.forEach(g => {
+    if (!g.group){
+      g.items.forEach(l => {
+        const opt = document.createElement('option');
+        opt.value = l.code;
+        opt.textContent = l.label;
+        els.langSelect.appendChild(opt);
+      });
+      return;
+    }
+    const og = document.createElement('optgroup');
+    og.label = g.group;
+    g.items.forEach(l => {
+      const opt = document.createElement('option');
+      opt.value = l.code;
+      opt.textContent = l.label;
+      og.appendChild(opt);
+    });
+    els.langSelect.appendChild(og);
   });
   const savedLang = localStorage.getItem('lisan_lang');
   // Default to en-US rather than "auto": if the phone's system language is Arabic,
@@ -470,6 +529,7 @@
   let translateQueue = Promise.resolve();
   let restartTimer = null;
   let watchdogTimer = null;
+  let suppressEndStatus = false;
 
   function setStatus(text, cls){
     els.statusText.textContent = text;
@@ -510,9 +570,10 @@
     r.onerror = (e) => {
       if (e.error === 'no-speech' || e.error === 'aborted') return; // expected, handled by onend restart
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed'){
-        setStatus('تم رفض إذن الميكروفون', 'err');
         userStopped = true;
-        stopListening();
+        suppressEndStatus = true;
+        stopListening({ preserveStatus: true });
+        setStatus('تم رفض إذن الميكروفون', 'err');
         return;
       }
       // network / audio-capture / etc — surface it but still let onend try to recover
@@ -530,7 +591,10 @@
       listening = false;
       if (userStopped){
         updateMicVisual();
-        setStatus('اضغط للبدء بالاستماع', 'idle');
+        if (!suppressEndStatus){
+          setStatus('اضغط للبدء بالاستماع', 'idle');
+        }
+        suppressEndStatus = false;
         return;
       }
       // Always build a brand-new recognizer for the restart — reusing the same
@@ -654,7 +718,7 @@
     }
   }
 
-  function stopListening(){
+  function stopListening(opts){
     userStopped = true;
     clearTimeout(restartTimer);
     clearTimeout(watchdogTimer);
@@ -662,7 +726,9 @@
     listening = false;
     updateMicVisual();
     stopVisualizer();
-    setStatus('تم الإيقاف', 'idle');
+    if (!(opts && opts.preserveStatus)){
+      setStatus('تم الإيقاف', 'idle');
+    }
   }
 
   els.micBtn.addEventListener('click', () => {

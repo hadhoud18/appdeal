@@ -111,6 +111,46 @@
     pointer-events:none;
   }
 
+  /* ---------- Target language row ---------- */
+  .target-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-top:12px;
+  }
+  .target-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.1em;
+    color:var(--ink-2);
+    text-transform:uppercase;
+  }
+  .target-picker{
+    display:flex;
+    gap:6px;
+    background:var(--bg-1);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:3px;
+  }
+  .target-pill{
+    font-family:'Manrope', sans-serif;
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink-1);
+    background:transparent;
+    border:none;
+    border-radius:999px;
+    padding:6px 14px;
+    cursor:pointer;
+    transition:background .2s ease, color .2s ease;
+  }
+  .target-pill.active{
+    background:linear-gradient(120deg, var(--gold-soft), var(--gold));
+    color:#0b1220;
+  }
+
   /* ---------- Status row ---------- */
   .status-row{
     text-align:center;
@@ -264,6 +304,28 @@
   .segment .cur{
     box-shadow: inset 0 -2px 0 var(--gold);
   }
+  .segment.script-latin{
+    font-family:'Manrope', sans-serif;
+    font-weight:600;
+    font-size:19px;
+    line-height:1.6;
+    direction:ltr;
+  }
+  .segment.provisional{
+    opacity:0.55;
+    animation:none;
+  }
+  .segment.provisional::after{
+    content:"";
+    display:inline-block;
+    width:6px; height:6px;
+    margin-inline-start:6px;
+    border-radius:50%;
+    background:var(--teal);
+    vertical-align:middle;
+    animation:blink 1s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:0.25;} 50%{opacity:1;} }
 
   @keyframes rise{
     from{ opacity:0; transform:translateY(6px); }
@@ -345,6 +407,11 @@
     </div>
   </div>
 
+  <div class="target-row">
+    <span class="target-label">ترجم إلى</span>
+    <div id="targetPicker" class="target-picker"></div>
+  </div>
+
   <div class="status-row">
     <span id="statusText" class="status-text idle">اضغط للبدء بالاستماع</span>
   </div>
@@ -393,7 +460,7 @@
   <div class="overlay" id="overlay">
     <div class="glyph">🎙</div>
     <h2>الإذن باستخدام الميكروفون</h2>
-    <p>يحتاج التطبيق إلى الاستماع عبر ميكروفون هاتفك ليترجم كلامك فور نطقه إلى العربية.</p>
+    <p>يحتاج التطبيق إلى الاستماع عبر ميكروفون هاتفك ليترجم كلامك فور نطقه إلى اللغة التي تختارها.</p>
     <button id="grantBtn">السماح والبدء</button>
     <span class="unsupported" id="unsupportedMsg" style="display:none;">Speech recognition isn't supported in this browser. Try Chrome or Safari.</span>
   </div>
@@ -402,6 +469,15 @@
 
 <script>
 (function(){
+  const TARGET_LANGS = [
+    { code: "ar", label: "العربية", script: "arabic",
+      placeholder: "الترجمة الفورية لكل ما يُقال ستظهر هنا لحظة بلحظة", glyph: "ترجمة" },
+    { code: "en", label: "English", script: "latin",
+      placeholder: "The live translation of everything spoken will appear here.", glyph: "EN" },
+    { code: "fr", label: "Français", script: "latin",
+      placeholder: "La traduction en direct de tout ce qui est dit apparaîtra ici.", glyph: "FR" },
+  ];
+
   const LANG_GROUPS = [
     {
       group: null, // ungrouped, shown first
@@ -481,6 +557,7 @@
 
   const els = {
     langSelect: document.getElementById('langSelect'),
+    targetPicker: document.getElementById('targetPicker'),
     statusText: document.getElementById('statusText'),
     micBtn: document.getElementById('micBtn'),
     ring1: document.getElementById('ring1'),
@@ -521,6 +598,47 @@
   // language being spoken. Users can still switch to "auto" or any dialect manually.
   els.langSelect.value = savedLang || 'en-US';
 
+  // ---- Target (output) language picker: English / Arabic / French ----
+  let currentTarget = localStorage.getItem('lisan_target') || 'ar';
+  if (!TARGET_LANGS.some(t => t.code === currentTarget)) currentTarget = 'ar';
+
+  function targetInfo(code){
+    return TARGET_LANGS.find(t => t.code === code) || TARGET_LANGS[0];
+  }
+
+  function renderTargetPicker(){
+    els.targetPicker.innerHTML = '';
+    TARGET_LANGS.forEach(t => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'target-pill' + (t.code === currentTarget ? ' active' : '');
+      btn.textContent = t.label;
+      btn.dataset.code = t.code;
+      btn.addEventListener('click', () => setTarget(t.code));
+      els.targetPicker.appendChild(btn);
+    });
+  }
+
+  function applyTargetToEmptyState(){
+    const info = targetInfo(currentTarget);
+    const glyphEl = els.translationEmpty.querySelector('.glyph');
+    const textEl = els.translationEmpty.querySelector('p');
+    if (glyphEl) glyphEl.textContent = info.glyph;
+    if (textEl) textEl.textContent = info.placeholder;
+  }
+
+  function setTarget(code){
+    if (code === currentTarget) return;
+    currentTarget = code;
+    localStorage.setItem('lisan_target', code);
+    renderTargetPicker();
+    applyTargetToEmptyState();
+    clearProvisional();
+  }
+
+  renderTargetPicker();
+  applyTargetToEmptyState();
+
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
   let listening = false;
@@ -559,6 +677,7 @@
         if (res.isFinal){
           els.sourceText.classList.remove('source-placeholder');
           els.sourceText.innerHTML = escapeHtml(text);
+          clearTimeout(provisionalTimer); // stop any pending debounce; doTranslate handles promotion/refetch itself
           translateSegment(text.trim());
         } else {
           interim += text;
@@ -566,6 +685,7 @@
       }
       if (interim){
         els.sourceText.innerHTML = '<span class="interim">' + escapeHtml(interim) + '</span>';
+        updateProvisional(interim);
       }
     };
 
@@ -687,31 +807,122 @@
     }
   }
 
+  function resolveSrcLang(){
+    const v = els.langSelect.value === 'auto' ? (navigator.language || 'en') : els.langSelect.value;
+    return v.split('-')[0];
+  }
+
+  const translationCache = new Map(); // `${src}|${target}|${text}` -> translated text, avoids re-fetching repeats
+  let provisionalNode = null;
+  let provisionalText = '';
+  let provisionalTranslated = null;
+  let provisionalTimer = null;
+  let provisionalAbort = null;
+
+  function clearProvisional(){
+    clearTimeout(provisionalTimer);
+    if (provisionalAbort) { try{ provisionalAbort.abort(); }catch(_){} provisionalAbort = null; }
+    if (provisionalNode && provisionalNode.parentNode) provisionalNode.remove();
+    provisionalNode = null;
+    provisionalText = '';
+    provisionalTranslated = null;
+  }
+
+  async function fetchTranslation(text, srcLang, target, signal){
+    if (srcLang === target){
+      return text; // same language — nothing to translate
+    }
+    const cacheKey = `${srcLang}|${target}|${text}`;
+    if (translationCache.has(cacheKey)) return translationCache.get(cacheKey);
+    const pair = `${srcLang}|${target}`;
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${pair}`;
+    const res = await fetch(url, signal ? { signal } : undefined);
+    const json = await res.json();
+    const translated = json && json.responseData && json.responseData.translatedText
+      ? json.responseData.translatedText
+      : text;
+    translationCache.set(cacheKey, translated);
+    return translated;
+  }
+
+  function styleSegment(node){
+    const info = targetInfo(currentTarget);
+    node.classList.toggle('script-latin', info.script === 'latin');
+    node.dir = info.script === 'latin' ? 'ltr' : 'rtl';
+  }
+
+  // Live "as-you-speak" preview: translate interim (not-yet-final) speech after
+  // a short debounce, so the translation is usually already sitting there by
+  // the time the sentence actually finishes — instead of only starting the
+  // network request after the pause. This is the main latency fix.
+  function updateProvisional(interimText){
+    const trimmed = interimText.trim();
+    if (!trimmed){ clearProvisional(); return; }
+    if (trimmed === provisionalText) return; // nothing new to translate yet
+    provisionalText = trimmed;
+    clearTimeout(provisionalTimer);
+    provisionalTimer = setTimeout(() => runProvisionalTranslation(trimmed), 220);
+  }
+
+  async function runProvisionalTranslation(text){
+    if (provisionalAbort) { try{ provisionalAbort.abort(); }catch(_){} }
+    const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    provisionalAbort = controller;
+
+    if (!provisionalNode){
+      els.translationEmpty.style.display = 'none';
+      provisionalNode = document.createElement('div');
+      provisionalNode.className = 'segment provisional';
+      styleSegment(provisionalNode);
+      els.translationPanel.appendChild(provisionalNode);
+    }
+    els.translationPanel.scrollTop = els.translationPanel.scrollHeight;
+
+    try{
+      const srcLang = resolveSrcLang();
+      const translated = await fetchTranslation(text, srcLang, currentTarget, controller && controller.signal);
+      if (text !== provisionalText) return; // superseded by newer speech while this was in flight
+      provisionalTranslated = translated;
+      if (provisionalNode) provisionalNode.textContent = translated;
+    } catch(err){
+      // aborted or network hiccup — leave whatever was last shown, final pass will fix it
+    }
+  }
+
   async function translateSegment(text){
     if (!text) return;
     translateQueue = translateQueue.then(() => doTranslate(text));
   }
 
-  async function doTranslate(text){
+  async function doTranslate(finalText){
+    // Fast path: if the finished sentence matches what we already translated
+    // provisionally while the person was still speaking, promote it instantly
+    // instead of re-fetching — this is what makes it feel "on the spot".
+    if (provisionalNode && provisionalText === finalText && provisionalTranslated != null){
+      const node = provisionalNode;
+      node.classList.remove('provisional');
+      provisionalNode = null;
+      provisionalText = '';
+      provisionalTranslated = null;
+      els.translationPanel.scrollTop = els.translationPanel.scrollHeight;
+      return;
+    }
+    clearProvisional();
+
     els.translationEmpty.style.display = 'none';
     const node = document.createElement('div');
     node.className = 'segment';
+    styleSegment(node);
     node.innerHTML = '<span class="cur">…</span>';
     els.translationPanel.appendChild(node);
     els.translationPanel.scrollTop = els.translationPanel.scrollHeight;
 
     try{
-      const srcLang = (els.langSelect.value === 'auto' ? (navigator.language || 'en') : els.langSelect.value).split('-')[0];
-      const pair = srcLang === 'ar' ? 'ar|ar' : `${srcLang}|ar`;
-      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${pair}`;
-      const res = await fetch(url);
-      const json = await res.json();
-      const translated = json && json.responseData && json.responseData.translatedText
-        ? json.responseData.translatedText
-        : text;
+      const srcLang = resolveSrcLang();
+      const translated = await fetchTranslation(finalText, srcLang, currentTarget);
       node.innerHTML = escapeHtml(translated);
     } catch(err){
-      node.innerHTML = escapeHtml(text);
+      node.innerHTML = escapeHtml(finalText);
       node.style.color = 'var(--ink-2)';
     }
     els.translationPanel.scrollTop = els.translationPanel.scrollHeight;
@@ -740,6 +951,7 @@
     suppressEndStatus = true; // stopListening already sets the right status; don't let the async onend overwrite it
     clearTimeout(restartTimer);
     clearTimeout(watchdogTimer);
+    clearProvisional();
     if (recognition){ try{ recognition.stop(); }catch(_){} }
     listening = false;
     updateMicVisual();
@@ -761,7 +973,7 @@
       } catch(err){
         setStatus('تعذّرت إعادة التشغيل — اضغط للمحاولة يدويًا', 'err');
       }
-    }, 250);
+    }, 120); // short delay just enough to avoid "already started" races, not for user-perceived speed
   }
 
   els.micBtn.addEventListener('click', () => {
@@ -786,8 +998,10 @@
   });
 
   els.clearBtn.addEventListener('click', () => {
+    clearProvisional();
     els.translationPanel.querySelectorAll('.segment').forEach(n => n.remove());
     els.translationEmpty.style.display = 'flex';
+    applyTargetToEmptyState();
     els.sourceText.textContent = 'سيظهر هنا النص كما يُنطق، بأي لغة أو لهجة';
     els.sourceText.classList.add('source-placeholder');
   });

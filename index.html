@@ -530,6 +530,8 @@
   let restartTimer = null;
   let watchdogTimer = null;
   let suppressEndStatus = false;
+  let micStream = null;         // acquired once, reused for the whole session
+  let visualizerRunning = false;
 
   function setStatus(text, cls){
     els.statusText.textContent = text;
@@ -600,17 +602,8 @@
       // Always build a brand-new recognizer for the restart — reusing the same
       // instance right after "onend" throws "already started" on many browsers,
       // which was silently swallowed before and left the UI stuck on "listening"
-      // while nothing was actually running.
-      clearTimeout(restartTimer);
-      restartTimer = setTimeout(() => {
-        if (userStopped) return;
-        try{
-          recognition = buildRecognition();
-          recognition.start();
-        } catch(err){
-          setStatus('تعذّرت إعادة التشغيل — اضغط للمحاولة يدويًا', 'err');
-        }
-      }, 250);
+      // while nothing was actually running. This never touches the mic stream.
+      restartRecognizer();
     };
 
     return r;
@@ -640,14 +633,17 @@
   }
 
   function startVisualizer(stream){
+    stopVisualizer(); // tear down any previous audio graph before building a new one
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 256;
     micSource = audioCtx.createMediaStreamSource(stream);
     micSource.connect(analyser);
+    visualizerRunning = true;
     const data = new Uint8Array(analyser.frequencyBinCount);
 
     function tick(){
+      if (!visualizerRunning) return;
       analyser.getByteFrequencyData(data);
       let sum = 0;
       for (let i = 0; i < data.length; i++) sum += data[i];
@@ -665,8 +661,30 @@
   }
 
   function stopVisualizer(){
+    visualizerRunning = false;
     if (rafId) cancelAnimationFrame(rafId);
     if (audioCtx) { audioCtx.close().catch(()=>{}); audioCtx = null; }
+  }
+
+  // Acquire the microphone exactly once per session. Every subsequent call
+  // (language switch, auto-restart after a pause, watchdog recovery) reuses
+  // the SAME stream instead of calling getUserMedia again. Requesting a new
+  // mic stream while a previous one hasn't fully released is what causes
+  // mobile browsers to silently refuse the mic on later attempts.
+  async function ensureMicStream(){
+    const isLive = micStream && micStream.getTracks().some(t => t.readyState === 'live');
+    if (isLive) return micStream;
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    startVisualizer(micStream);
+    return micStream;
+  }
+
+  function releaseMicStream(){
+    stopVisualizer();
+    if (micStream){
+      micStream.getTracks().forEach(t => { try{ t.stop(); }catch(_){} });
+      micStream = null;
+    }
   }
 
   async function translateSegment(text){
@@ -706,8 +724,7 @@
       return;
     }
     try{
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      startVisualizer(stream);
+      await ensureMicStream();
       recognition = buildRecognition();
       userStopped = false;
       recognition.start();
@@ -720,15 +737,31 @@
 
   function stopListening(opts){
     userStopped = true;
+    suppressEndStatus = true; // stopListening already sets the right status; don't let the async onend overwrite it
     clearTimeout(restartTimer);
     clearTimeout(watchdogTimer);
     if (recognition){ try{ recognition.stop(); }catch(_){} }
     listening = false;
     updateMicVisual();
-    stopVisualizer();
+    releaseMicStream(); // full stop: also release the actual mic hardware
     if (!(opts && opts.preserveStatus)){
       setStatus('تم الإيقاف', 'idle');
     }
+  }
+
+  // Restart just the recognizer (used for auto-restart after a pause, and for
+  // language switches) WITHOUT touching the microphone stream at all.
+  function restartRecognizer(){
+    clearTimeout(restartTimer);
+    restartTimer = setTimeout(() => {
+      if (userStopped) return;
+      try{
+        recognition = buildRecognition();
+        recognition.start();
+      } catch(err){
+        setStatus('تعذّرت إعادة التشغيل — اضغط للمحاولة يدويًا', 'err');
+      }
+    }, 250);
   }
 
   els.micBtn.addEventListener('click', () => {
@@ -741,9 +774,14 @@
   els.langSelect.addEventListener('change', () => {
     localStorage.setItem('lisan_lang', els.langSelect.value);
     if (listening && recognition){
-      userStopped = true;
+      // Only restart the recognizer with the new language — the mic stream
+      // itself is left completely untouched. Calling getUserMedia again here
+      // (the old behavior) is what caused the mic to lock up on later
+      // language switches on mobile browsers.
       try{ recognition.stop(); }catch(_){}
-      setTimeout(() => { userStopped = false; startListening(); }, 250);
+      // onend fires asynchronously and, since userStopped is still false,
+      // it will call restartRecognizer() itself — which reads the freshly
+      // selected language value. Nothing further needed here.
     }
   });
 

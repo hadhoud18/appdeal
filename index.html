@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
 <title>لِسان — ترجمة فورية بالصوت</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23e4c766'/%3E%3Cstop offset='1' stop-color='%232fc7b0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%230e1626'/%3E%3Ccircle cx='32' cy='27' r='13' fill='none' stroke='url(%23g)' stroke-width='3.5'/%3E%3Cpath d='M32 40v9M24 49h16' stroke='url(%23g)' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23e4c766'/%3E%3Cstop offset='1' stop-color='%232fc7b0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%230e1626'/%3E%3Cpath d='M16 47c-5 0-8-5-8-12 0-12 8-21 19-21 5 0 9 3.5 9 8 0 6.5-6.3 9.4-14 9.4' stroke='url(%23g)' stroke-width='4.2' fill='none' stroke-linecap='round'/%3E%3Crect x='38' y='23' width='5' height='16' rx='2.5' fill='url(%23g)'/%3E%3Crect x='46' y='13' width='5' height='32' rx='2.5' fill='url(%23g)'/%3E%3Crect x='54' y='19' width='5' height='20' rx='2.5' fill='url(%23g)'/%3E%3C/svg%3E">
 <meta name="theme-color" content="#080c14">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,14 +76,14 @@
     gap:9px;
   }
   .logo-mark{
-    width:34px; height:34px;
+    width:38px; height:34px;
     flex-shrink:0;
     border-radius:10px;
     background:linear-gradient(155deg, #17223a, #0e1626);
     box-shadow:0 0 0 1px var(--line), 0 8px 18px -8px rgba(0,0,0,0.6);
     display:flex; align-items:center; justify-content:center;
   }
-  .logo-mark svg{ width:20px; height:20px; }
+  .logo-mark svg{ width:24px; height:20px; }
   .brand-text{
     display:flex;
     flex-direction:column;
@@ -413,24 +413,71 @@
     cursor:pointer;
   }
   .overlay .unsupported{ color:var(--danger); font-size:12px; direction:ltr; }
+
+  /* ---------- Fast splash intro ---------- */
+  .splash{
+    position:fixed; inset:0; z-index:50;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+    background:var(--bg-0);
+    pointer-events:none; /* never blocks a real tap, even if something delays cleanup */
+    animation: splashOut .55s ease forwards;
+    animation-delay:.5s;
+  }
+  .splash-logo{
+    width:68px; height:60px;
+    border-radius:20px;
+    background:linear-gradient(155deg, #17223a, #0e1626);
+    box-shadow:0 0 0 1px var(--line), 0 24px 55px -20px rgba(0,0,0,0.75);
+    display:flex; align-items:center; justify-content:center;
+    animation: splashPulse 1s ease-in-out infinite;
+  }
+  .splash-logo svg{ width:42px; height:36px; }
+  .splash-word{
+    font-family:'Amiri', serif;
+    font-weight:700;
+    font-size:24px;
+    color:var(--gold-soft);
+    letter-spacing:0.5px;
+  }
+  @keyframes splashPulse{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.05); }
+  }
+  @keyframes splashOut{
+    to{ opacity:0; visibility:hidden; }
+  }
 </style>
 </head>
 <body>
+
+<div class="splash" id="splash" aria-hidden="true">
+  <span class="splash-logo">
+    <svg viewBox="0 0 36 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 25c-3 0-5-3-5-7 0-7 5-12 11-12 3 0 5 2 5 4.6 0 3.7-3.6 5.4-8 5.4" stroke="url(#logoGrad)" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <rect x="21" y="13" width="3" height="9" rx="1.5" fill="url(#logoGrad)"/>
+      <rect x="26" y="7" width="3" height="18" rx="1.5" fill="url(#logoGrad)"/>
+      <rect x="31" y="11" width="3" height="11" rx="1.5" fill="url(#logoGrad)"/>
+    </svg>
+  </span>
+  <span class="splash-word">لِسان</span>
+</div>
 
 <div class="app">
 
   <div class="header">
     <div class="brand">
       <span class="logo-mark">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 36 32" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="var(--gold-soft)"/>
               <stop offset="1" stop-color="var(--teal)"/>
             </linearGradient>
           </defs>
-          <circle cx="12" cy="10" r="6.2" stroke="url(#logoGrad)" stroke-width="1.7"/>
-          <path d="M12 16.2v4.3M8.3 20.5h7.4" stroke="url(#logoGrad)" stroke-width="1.7" stroke-linecap="round"/>
+          <path d="M8 25c-3 0-5-3-5-7 0-7 5-12 11-12 3 0 5 2 5 4.6 0 3.7-3.6 5.4-8 5.4" stroke="url(#logoGrad)" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <rect x="21" y="13" width="3" height="9" rx="1.5" fill="url(#logoGrad)"/>
+          <rect x="26" y="7" width="3" height="18" rx="1.5" fill="url(#logoGrad)"/>
+          <rect x="31" y="11" width="3" height="11" rx="1.5" fill="url(#logoGrad)"/>
         </svg>
       </span>
       <span class="brand-text">
@@ -675,6 +722,13 @@
   renderTargetPicker();
   applyTargetToEmptyState();
 
+  const splashEl = document.getElementById('splash');
+  if (splashEl){
+    splashEl.addEventListener('animationend', (e) => {
+      if (e.animationName === 'splashOut') splashEl.remove();
+    });
+  }
+
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
   let listening = false;
@@ -698,14 +752,25 @@
     return v;
   }
 
+  // The language last confirmed to actually work (i.e. it produced a result).
+  // Used to recover automatically if a newly-picked language turns out to be
+  // unsupported by the device's speech engine, instead of tearing the mic down.
+  let lastGoodLang = els.langSelect.value;
+  let confirmedThisSession = false;
+
   function buildRecognition(){
     const r = new SpeechRecognition();
     r.continuous = true;
     r.interimResults = true;
     r.lang = recogLangCode();
+    confirmedThisSession = false;
 
     r.onresult = (e) => {
       resetWatchdog();
+      if (!confirmedThisSession){
+        confirmedThisSession = true;
+        lastGoodLang = els.langSelect.value; // this language is confirmed working on this device
+      }
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++){
         const res = e.results[i];
@@ -727,6 +792,29 @@
 
     r.onerror = (e) => {
       if (e.error === 'no-speech' || e.error === 'aborted') return; // expected, handled by onend restart
+
+      // Many Android speech engines don't have every language pack installed,
+      // and report the SAME 'not-allowed'/'service-not-allowed' error for "this
+      // language isn't available" as they do for a real permission revocation.
+      // If the mic hardware itself is still live, this is that case — not an
+      // actual permission problem — so recover by reverting to the last
+      // language that worked, instead of tearing down the mic and forcing the
+      // user through the permission screen again.
+      const micStillLive = micStream && micStream.getTracks().some(t => t.readyState === 'live');
+      const langIssue = e.error === 'language-not-supported' ||
+        ((e.error === 'not-allowed' || e.error === 'service-not-allowed') && micStillLive);
+
+      if (langIssue){
+        if (els.langSelect.value !== lastGoodLang){
+          setStatus('هذه اللغة غير مدعومة للتعرف الصوتي على جهازك — تمت العودة للغة السابقة', 'err');
+          els.langSelect.value = lastGoodLang;
+          localStorage.setItem('lisan_lang', lastGoodLang);
+        } else {
+          setStatus('التعرف الصوتي غير متاح لهذه اللغة على جهازك', 'err');
+        }
+        return; // onend will fire next and restartRecognizer() picks up the reverted language
+      }
+
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed'){
         userStopped = true;
         suppressEndStatus = true;
